@@ -2906,6 +2906,12 @@ th{text-align:left;padding:8px 12px;font-size:9px;letter-spacing:.5px;color:#6b7
 td{padding:9px 12px;border-top:1px solid #141414;white-space:nowrap}
 tbody tr{cursor:pointer;transition:background .15s}tbody tr:hover{background:rgba(255,210,122,.06)}
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.fbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 14px}
+.fgrp{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#0e0e0e;border:1px solid #1c1c24;color:#cfd8e6;padding:6px 12px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}
+.chip.on{background:rgba(255,210,122,.12);border-color:#FFD27A66;color:#FFD27A}
+.fsel{font-size:11px;color:#8794ab;display:flex;align-items:center;gap:6px}
+.fsel select{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:8px;padding:5px 8px;font-size:12px}
 .swipe{display:none;font-size:10px;color:#5b6678;padding:0 18px 8px}
 @media(max-width:640px){.swipe{display:block}}
 .sym{font-weight:800;color:#fff}.muted{color:#6b7689}.up{color:#22C55E;font-weight:700}.dn{color:#EF4444;font-weight:700}
@@ -2942,8 +2948,12 @@ html,body{overflow-x:hidden;max-width:100%}
     <div class="pchip" style="border-color:#FFB23F44"><div class="t" style="color:#FFB23F">🎲 Tactique (court)</div><div class="d">1-2 mois · théta violent · petite taille · setup exceptionnel only</div></div>
   </div>
   <div id="feat"></div>
+  <div id="alerts"></div>
   <div class="stats" id="stats"></div>
+  <div id="filterbar"></div>
   <div id="sections"></div>
+  <div id="simulator"></div>
+  <div id="strategies"></div>
   <div class="panel" style="border-color:#A78BFA33"><div class="ph" style="background:linear-gradient(90deg,#A78BFA26,transparent 70%)"><span style="color:#fff">📚 GUIDE OPTIONS · COMPRENDRE CHAQUE COLONNE</span></div>
   <div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px">
     <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">💎 Qualité /100</div><div class="muted" style="font-size:11px;line-height:1.55">Note globale du contrat : liquidité, spread, delta, échéance, IV. <b style="color:#22C55E">≥78</b> excellent · <b style="color:#FFD27A">62-77</b> bon · <b style="color:#EF4444">&lt;50</b> à éviter.</div></div>
@@ -3005,13 +3015,84 @@ async function load(){
   // stats
   const cnt=t=>board.filter(c=>c.fit===t).length;
   document.getElementById('stats').innerHTML=[['leaps','LEAPS Core',C.g],['swing','Swing',C.blue],['tact','Tactique',C.yl],['avoid','À éviter',C.r]].map(([k,l,c])=>`<div class="stat" style="border-color:${c}33"><div class="n" style="color:${c}">${cnt(k)}</div><div class="l">${l}</div></div>`).join('');
-  // sections par bucket
-  const byBucket=b=>board.filter(c=>c.bucket===b).sort((a,b)=>(b.quality||0)-(a.quality||0));
-  document.getElementById('sections').innerHTML=
-    section(C.g,'💎 LEAPS CORE · 6-18 mois · cœur de stratégie',byBucket('long'))
-    +section(C.blue,'⚡ SWING · ~3 mois · mouvement rapide',byBucket('moyen'))
-    +section(C.yl,'🎲 TACTIQUE · 1-2 mois · théta violent, petite taille',byBucket('court'))
-    +(puts.length?section(C.r,'🛡️ PUTS · couverture / pari baissier',[...puts].sort((a,b)=>(b.quality||0)-(a.quality||0))):'');
+  // stockage global + briques avancees
+  const spotMap={};(s.rows||[]).forEach(r=>{if(r&&r.symbol)spotMap[r.symbol]=r.price;});
+  window.__board=board;window.__puts=puts;window.__spot=spotMap;
+  buildAlerts();buildFilterbar();renderSections();buildSimulator();buildStrategies();
+}
+function sortFn(k){return k==='pop'?(a,b)=>(b.pop||0)-(a.pop||0):k==='cost'?(a,b)=>(a.cost||0)-(b.cost||0):k==='danger'?(a,b)=>(a.danger_n||0)-(b.danger_n||0):k==='dte'?(a,b)=>(a.dte||0)-(b.dte||0):(a,b)=>(b.quality||0)-(a.quality||0);}
+function renderSections(){
+  const minQ=window.optMinQ||0, sk=window.optSort||'quality', filt=window.optFilter||'all';
+  const all=window.__board||[], pu=window.__puts||[];
+  const sec=(col,title,list)=>section(col,title,[...list].filter(c=>(c.quality||0)>=minQ).sort(sortFn(sk)));
+  let html='';
+  if(filt==='all') html=sec(C.g,'💎 LEAPS CORE · 6-18 mois · cœur de stratégie',all.filter(c=>c.bucket==='long'))
+    +sec(C.blue,'⚡ SWING · ~3 mois · mouvement rapide',all.filter(c=>c.bucket==='moyen'))
+    +sec(C.yl,'🎲 TACTIQUE · 1-2 mois · théta violent',all.filter(c=>c.bucket==='court'))
+    +(pu.length?sec(C.r,'🛡️ PUTS · couverture / pari baissier',pu):'');
+  else if(filt==='leaps') html=sec(C.g,'💎 LEAPS CORE',all.filter(c=>c.bucket==='long'));
+  else if(filt==='swing') html=sec(C.blue,'⚡ SWING',all.filter(c=>c.bucket==='moyen'));
+  else if(filt==='tact') html=sec(C.yl,'🎲 TACTIQUE',all.filter(c=>c.bucket==='court'));
+  else if(filt==='puts') html=sec(C.r,'🛡️ PUTS',pu);
+  document.getElementById('sections').innerHTML=html||'<div class="panel"><div class="muted" style="padding:18px">Aucun contrat ne correspond au filtre.</div></div>';
+}
+function buildFilterbar(){
+  const fb=document.getElementById('filterbar'); if(fb.dataset.on)return; fb.dataset.on='1';
+  const chip=(v,l)=>`<button class="chip" data-f="${v}" onclick="setFilt('${v}')">${l}</button>`;
+  fb.innerHTML=`<div class="fbar"><div class="fgrp">${chip('all','Tous')}${chip('leaps','💎 LEAPS')}${chip('swing','⚡ Swing')}${chip('tact','🎲 Tactique')}${chip('puts','🛡️ Puts')}</div>`
+    +`<label class="fsel">Tri <select onchange="window.optSort=this.value;renderSections()"><option value="quality">Qualité</option><option value="pop">POP</option><option value="cost">Coût ↑</option><option value="danger">Danger ↑</option><option value="dte">Échéance</option></select></label>`
+    +`<label class="fsel">Qualité min <select onchange="window.optMinQ=+this.value;renderSections()"><option value="0">Toutes</option><option value="50">≥50</option><option value="62">≥62</option><option value="78">≥78</option></select></label></div>`;
+  setFilt('all');
+}
+function setFilt(v){window.optFilter=v;document.querySelectorAll('#filterbar .chip').forEach(b=>b.classList.toggle('on',b.dataset.f===v));renderSections();}
+function buildSimulator(){
+  const sim=document.getElementById('simulator');
+  const all=[...(window.__board||[]),...(window.__puts||[])];
+  if(!all.length){sim.innerHTML='';return;}
+  if(!sim.dataset.on){sim.dataset.on='1';
+    sim.innerHTML=`<div class="panel" style="border-color:#34D39933"><div class="ph" style="background:linear-gradient(90deg,#34D39926,transparent 70%)"><span style="color:#fff">🧮 SIMULATEUR DE GAIN · à l'échéance</span></div><div style="padding:14px"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px"><label class="fsel">Contrat <select id="simSel" onchange="runSim()"></select></label><span id="simInfo" class="muted" style="font-size:11px"></span></div><div id="simOut"></div><div class="src">P&amp;L estimé À L'ÉCHÉANCE (valeur intrinsèque, hors valeur-temps) · 1 contrat = 100 actions · indicatif.</div></div></div>`;
+  }
+  const sel=document.getElementById('simSel'); const prev=sel.value;
+  window.__simAll=all;
+  sel.innerHTML=all.map((c,i)=>`<option value="${i}">${c.sym} ${c.type} $${c.strike} · ${eu(c.exp)} · Q${c.quality}</option>`).join('');
+  if(prev!==''&&+prev<all.length)sel.value=prev;
+  runSim();
+}
+function runSim(){
+  const all=window.__simAll||[]; const sel=document.getElementById('simSel'); if(!sel||!all.length)return;
+  const c=all[+sel.value||0]; const spot=(window.__spot||{})[c.sym]||c.strike; const mid=c.mid||(c.cost?c.cost/100:0); const isCall=c.type==='CALL';
+  document.getElementById('simInfo').textContent=`cours ≈ $${spot} · prime $${mid} · coût $${fmt(c.cost)} · breakeven $${c.be}`;
+  const steps=[-0.2,-0.1,-0.05,0,0.05,0.1,0.15,0.2,0.3];
+  const rws=steps.map(p=>{const S=+(spot*(1+p)).toFixed(2);const val=isCall?Math.max(S-c.strike,0):Math.max(c.strike-S,0);const pnl=Math.round((val-mid)*100);const ret=mid?Math.round((val-mid)/mid*100):0;const hl=p===0?'background:rgba(255,255,255,.04)':'';return `<tr style="${hl}"><td>$${S} <span class="muted">(${p>=0?'+':''}${Math.round(p*100)}%)</span></td><td>$${val.toFixed(2)}</td><td class="${pnl>=0?'up':'dn'}">${pnl>=0?'+':''}$${pnl}</td><td class="${ret>=0?'up':'dn'}">${ret>=0?'+':''}${ret}%</td></tr>`;}).join('');
+  document.getElementById('simOut').innerHTML=`<div class="tscroll"><table><thead><tr><th>Cours du titre</th><th>Valeur option</th><th>Gain / perte (1 contrat)</th><th>Rendement</th></tr></thead><tbody>${rws}</tbody></table></div>`;
+}
+function buildStrategies(){
+  const el=document.getElementById('strategies'); if(el.dataset.on)return; el.dataset.on='1';
+  const card=(ic,t,col,principe,profil,quand)=>`<div style="flex:1 1 45%;min-width:255px;background:#0c0c0c;border:1px solid ${col}33;border-radius:11px;padding:13px 15px"><div style="font-size:13px;font-weight:800;color:${col};margin-bottom:6px">${ic} ${t}</div><div style="font-size:11.5px;line-height:1.65"><b>Principe :</b> ${principe}<br><b>Profil :</b> ${profil}<br><b>Quand :</b> ${quand}</div></div>`;
+  el.innerHTML=`<div class="panel" style="border-color:#FFD27A33"><div class="ph" style="background:linear-gradient(90deg,#FFD27A26,transparent 70%)"><span style="color:#fff">🧩 STRATÉGIES OPTIONS · au-delà de l'achat simple</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;padding:14px">`
+    +card('📈','Achat de CALL',C.g,'Acheter un call pour profiter de la hausse.','Risque limité à la prime · gain élevé si ça monte.','Forte conviction haussière, tendance confirmée.')
+    +card('🪜','Bull Call Spread',C.blue,'Acheter un call + en vendre un plus haut.','Coût réduit (~30-50%) · gain plafonné au strike vendu.','Hausse modérée, réduire le coût et le théta.')
+    +card('🛡️','Protective Put',C.cy,'Détenir 100 actions + acheter un put.','Assurance : perte plancher · coût = prime du put.','Protéger une position contre une chute.')
+    +card('💰','Covered Call',C.gold,'Détenir 100 actions + vendre un call.','Encaisse une prime · upside plafonné au strike vendu.','Marché calme, générer du revenu.')
+    +card('🏦','Cash-Secured Put',C.yl,'Vendre un put en gardant le cash de côté.','Encaisse une prime · achat imposé si ça baisse.','Vouloir entrer sur un titre à un prix plus bas.')
+    +card('🦅','Bear Put Spread',C.r,'Acheter un put + en vendre un plus bas.','Coût réduit · gain plafonné · pari baissier.','Baisse modérée attendue, couverture peu chère.')
+    +`</div><div class="src">Repère pédagogique — analyse éducative, jamais un conseil. Aucun ordre passé (lecture seule).</div></div>`;
+}
+function buildAlerts(){
+  const all=[...(window.__board||[]),...(window.__puts||[])]; const el=document.getElementById('alerts'); if(!all.length){el.innerHTML='';return;}
+  const a=[];
+  [...all].filter(c=>(c.quality||0)>=78&&(c.danger==='Faible'||c.danger==='Modéré')&&(c.pop||0)>=50).sort((x,y)=>(y.quality||0)-(x.quality||0)).slice(0,2)
+    .forEach(c=>a.push(['🚀','Setup exceptionnel',C.g,`${c.sym} ${c.type} $${c.strike} — qualité ${c.quality}, POP ${c.pop}%, danger ${c.danger}`]));
+  const cheap=[...all].filter(c=>(c.quality||0)>=62).sort((x,y)=>(x.cost||0)-(y.cost||0))[0];
+  if(cheap)a.push(['💸','Solide & abordable',C.blue,`${cheap.sym} ${cheap.type} $${cheap.strike} — qualité ${cheap.quality} pour seulement $${fmt(cheap.cost)}`]);
+  const safe=[...all].filter(c=>c.danger==='Faible').sort((x,y)=>(y.pop||0)-(x.pop||0))[0];
+  if(safe)a.push(['🛟','Meilleure proba / risque',C.cy,`${safe.sym} ${safe.type} $${safe.strike} — POP ${safe.pop}%, danger Faible`]);
+  const trap=[...all].filter(c=>(c.quality||0)<50||c.danger==='Extrême').sort((x,y)=>(x.quality||0)-(y.quality||0))[0];
+  if(trap)a.push(['⚠️','Piège à éviter',C.r,`${trap.sym} ${trap.type} $${trap.strike} — qualité ${trap.quality}, danger ${trap.danger}`]);
+  if(!a.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="panel" style="border-color:#F5A62333"><div class="ph" style="background:linear-gradient(90deg,#F5A62326,transparent 70%)"><span style="color:#fff">🔔 ALERTES OPTIONS DU JOUR</span><span class="cnt">${a.length} repérées</span></div><div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px">`
+    +a.map(x=>`<div style="flex:1 1 45%;min-width:250px;background:#0c0c0c;border:1px solid ${x[2]}33;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:${x[2]};margin-bottom:3px">${x[0]} ${x[1]}</div><div style="font-size:11.5px;line-height:1.5">${x[3]}</div></div>`).join('')
+    +`</div><div class="src">Détecté automatiquement depuis le board du jour (qualité, POP, danger, coût) · indicatif.</div></div>`;
 }
 load();setInterval(load,20000);
 </script></body></html>"""
