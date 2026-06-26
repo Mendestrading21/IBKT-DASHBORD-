@@ -716,6 +716,20 @@ def scan_ep():
     return jsonify({**scan_state, 'ai_on': ai.available()})
 
 
+@app.route('/healthz')
+def healthz():
+    """Health check (Render) — toujours 200 si le process répond. Indique l'état
+    du scan sans bloquer. Aucune donnée sensible, lecture seule."""
+    return jsonify({
+        'status': 'ok',
+        'ibkr_enabled': IBKR_ENABLED,
+        'universe': len(UNIVERSE),
+        'scanned': scan_state.get('scanned_n'),
+        'last_scan': scan_state.get('updated'),
+        'scan_error': scan_state.get('error'),
+    }), 200
+
+
 @app.route('/options/<sym>')
 def opt_ep(sym):
     return jsonify(options_pack(sym.upper()))

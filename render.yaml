@@ -1,14 +1,20 @@
 # Déploiement cloud (Render.com) — dashboard d'analyse, sans IBKR live (pas de TWS sur le cloud).
 # Sur Render : New + → Blueprint → choisir ce repo → Render lit ce fichier.
+# V3 : serveur de production Gunicorn (1 worker = 1 seul thread de scan 120s),
+#      multi-threads pour les requêtes concurrentes, health check /healthz,
+#      threads de fond démarrés à l'import via START_ON_IMPORT=1.
 services:
   - type: web
     name: trading-desk
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python terminal.py
+    startCommand: gunicorn terminal:app --worker-class gthread --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /healthz
     envVars:
-      - key: NO_IBKR        # désactive la connexion IBKR (pas de TWS sur le cloud)
+      - key: NO_IBKR          # désactive la connexion IBKR (pas de TWS sur le cloud)
+        value: "1"
+      - key: START_ON_IMPORT  # démarre les threads de scan/news/etc. à l'import (gunicorn)
         value: "1"
       - key: PYTHON_VERSION
         value: "3.12.4"
