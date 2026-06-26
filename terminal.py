@@ -1490,7 +1490,7 @@ document.body.insertBefore(nav,document.body.firstChild);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
-<div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">◣ TRADING DESK</span><a href="/watchlist" style="margin-left:12px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">📋 Daily Watchlist</a><a href="/options" style="margin-left:8px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">💎 Options Desk</a><a href="/entreprises" style="margin-left:8px;font-size:11px;font-weight:800;color:#7FB3FF;text-decoration:none;border:1px solid #38BDF855;padding:4px 11px;border-radius:8px;background:rgba(56,189,248,.06)">🏢 Analyse Entreprise</a><input id="dSearch" placeholder="🔍 Rechercher un titre…" onkeydown="if(event.key==='Enter'&&this.value.trim())location.href='/titre/'+this.value.trim().toUpperCase()" style="margin-left:10px;background:#0e0e0e;border:1px solid #2a2a30;color:#e8edf5;padding:5px 11px;border-radius:8px;font-size:11px;width:175px;outline:none"><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
+<div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">◣ TRADING DESK</span><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
 <div class="daily">
   <div class="dhead">
     <div>
@@ -1516,10 +1516,25 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div id="dStar" style="margin-bottom:18px"></div>
   <div class="khero" id="dHero2"></div>
   <div class="scard" style="margin-bottom:14px"><div class="shead"><span class="ico">🛡️</span> RISK CENTER · santé du marché & garde-fous</div><div class="riskgrid" id="dRisk" style="padding:16px"></div></div>
+  <div class="stitle">🎯 OPPORTUNITÉS DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· le meilleur setup + ce qui a changé + tous les signaux</span></div>
+  <div class="herorow">
+    <div class="hero" id="dHero"><span class="muted" style="padding:20px">chargement…</span></div>
+    <div class="scard s-green"><div class="shead"><span class="ico">🔄</span> CE QUI A CHANGÉ DEPUIS HIER</div><div id="dChanges" style="padding:14px"></div></div>
+  </div>
+  <div class="stitle">📊 MARCHÉ INTERNE <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· participation & répartition des 57 leaders</span></div>
+  <div class="breadth">
+    <span class="bl">BREADTH LEADERS (% ACHAT)</span>
+    <div class="bar"><div class="fill" id="dBreadthFill" style="width:0%"></div></div>
+    <span class="bv" id="dBreadthVal">—</span>
+    <div class="seg" id="dSeg"></div>
+  </div>
+  <div class="panorama" style="margin-bottom:6px">
+    <div class="pcard"><div class="muted" style="font-size:11px;letter-spacing:1px;margin-bottom:8px">RÉPARTITION VERDICTS</div><canvas id="dDonut" height="168"></canvas></div>
+    <div class="pcard"><div class="muted" style="font-size:11px;letter-spacing:1px;margin-bottom:10px">MARCHÉ INTERNE · 57 leaders</div><div id="dInternals"></div></div>
+  </div>
   <div class="stitle">⚡ TON PLAN DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· recalculé en continu · tout l'univers + tes positions passés au crible · sur quoi travailler aujourd'hui</span></div>
   <div id="dPlan" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px;margin-bottom:22px"></div>
-  <div class="stitle">🎯 PLAN DE DÉPLOIEMENT DU CAPITAL <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· permission marché · ordre de priorité · combien et sur quoi engager</span></div>
-  <div id="dCapital" style="margin-bottom:22px"></div>
+  <div id="dCapital" style="display:none"></div>
   <div class="stitle">🎯 RECOMMANDATIONS IBKR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· score /40 · niveau S+/S/A/B · timing · clic → verdict complet</span></div>
   <div class="secgrid" id="dRecs"></div>
   <div class="stitle">📊 LES PLUS GROS MOUVEMENTS <span id="dMoversSess" style="font-weight:700;letter-spacing:0;font-size:11px"></span></div>
@@ -1544,26 +1559,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     </div>
     <div id="posBody" style="margin-top:8px"></div>
   </div>
-  <div class="breadth">
-    <span class="bl">BREADTH LEADERS (% ACHAT)</span>
-    <div class="bar"><div class="fill" id="dBreadthFill" style="width:0%"></div></div>
-    <span class="bv" id="dBreadthVal">—</span>
-    <div class="seg" id="dSeg"></div>
-  </div>
-
-  <div class="panorama">
-    <div class="pcard"><div class="muted" style="font-size:11px;letter-spacing:1px;margin-bottom:8px">RÉPARTITION VERDICTS</div><canvas id="dDonut" height="168"></canvas></div>
-    <div class="pcard"><div class="muted" style="font-size:11px;letter-spacing:1px;margin-bottom:10px">MARCHÉ INTERNE · 57 leaders</div><div id="dInternals"></div></div>
-  </div>
-
   <div class="stitle">🔥 ROTATION SECTORIELLE <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· classé par force · ▲/▼ vs hier · clic titre → fiche</span></div>
   <div class="secgrid" id="dSectors"></div>
-
-  <div class="stitle">🎯 OPPORTUNITÉS DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· le meilleur setup + ce qui a changé + tous les signaux</span></div>
-  <div class="herorow">
-    <div class="hero" id="dHero"><span class="muted" style="padding:20px">chargement…</span></div>
-    <div class="scard s-green"><div class="shead"><span class="ico">🔄</span> CE QUI A CHANGÉ DEPUIS HIER</div><div id="dChanges" style="padding:14px"></div></div>
-  </div>
 
   <div class="poster">
     <div class="scard s-green span2"><div class="shead"><span class="ico">🎯</span> TOP SCANNER PICKS<span class="cnt" id="dPicksCnt"></span></div>
