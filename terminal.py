@@ -995,7 +995,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="top"><span class="brand">◣ TRACK TERMINAL</span>
 <a href="/daily" style="margin-left:16px;color:#FFD27A;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;border:1px solid #FFD27A55;padding:5px 12px;border-radius:8px">📅 DAILY</a>
 <a href="/sectors" style="margin-left:8px;color:#FFB23F;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;border:1px solid #FFB23F55;padding:5px 12px;border-radius:8px">🔥 SECTEURS</a>
@@ -1443,7 +1466,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">◣ TRADING DESK</span><a href="/watchlist" style="margin-left:12px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">📋 Daily Watchlist</a><a href="/options" style="margin-left:8px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">💎 Options Desk</a><a href="/entreprises" style="margin-left:8px;font-size:11px;font-weight:800;color:#7FB3FF;text-decoration:none;border:1px solid #38BDF855;padding:4px 11px;border-radius:8px;background:rgba(56,189,248,.06)">🏢 Analyse Entreprise</a><input id="dSearch" placeholder="🔍 Rechercher un titre…" onkeydown="if(event.key==='Enter'&&this.value.trim())location.href='/titre/'+this.value.trim().toUpperCase()" style="margin-left:10px;background:#0e0e0e;border:1px solid #2a2a30;color:#e8edf5;padding:5px 11px;border-radius:8px;font-size:11px;width:175px;outline:none"><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
 <div class="daily">
   <div class="dhead">
@@ -2140,7 +2186,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 __NAV__
 <div class="wrap">
   <div class="head"><h1>🔥 SECTEURS <span>EN FORCE</span></h1>
@@ -2257,7 +2326,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="wrap">
   <div class="head"><div><h1>📰 NEWS · FLUX MARCHÉ LIVE</h1><div class="sub">Rafraîchi automatiquement chaque minute · traduit en français si la clé IA est active</div></div>
     <span class="live"><span class="d"></span><span id="nfresh">connexion…</span></span></div>
@@ -2295,7 +2387,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="wrap">
   <div class="head"><div><h1>💎 OPTIONS · LES MEILLEURES À TRAVAILLER</h1><div class="sub">Calls sélectionnés selon le marché · court / moyen / long · projection de gain si la cible est atteinte</div></div>
     <span class="live"><span class="d"></span><span id="ofresh">live</span></span></div>
@@ -2344,7 +2459,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="wrap">
   <div class="head"><div><h1>🗓️ CALENDRIER · RÉSULTATS (EARNINGS)</h1><div class="sub">Prochaines publications des 57 leaders · crucial pour les options (risque IV-crush)</div></div>
     <span class="live"><span class="d"></span><span id="cfresh">…</span></span></div>
@@ -2434,7 +2572,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <div class="wrap">
   <div class="head"><div>
     <div class="hero"><h1 style="margin:0">🎯 WATCHLIST DE LA SEMAINE</h1>
@@ -2722,7 +2883,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
   <div class="phead-top">
@@ -2935,7 +3119,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
   <div class="htop"><span style="font-size:38px">💎</span>
@@ -3146,7 +3353,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
   <div class="htop"><span style="font-size:36px">🏢</span>
@@ -3264,7 +3494,30 @@ html,body{overflow-x:hidden;max-width:100%}
   .hmeta{margin-left:0!important;text-align:left!important}
   .back{padding:5px 9px!important;font-size:11px!important}
 }
-</style></head><body>
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
   <div class="hdr">
