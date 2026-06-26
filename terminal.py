@@ -2363,6 +2363,8 @@ async function liveTick(){try{
   if(d&&Object.keys(window.__live).length){overlayLive(d);renderActionDuJour(d);renderPlan(d);renderMovers(d);renderRecs(d);if(typeof renderPositions==='function')renderPositions(d);}
   updateLiveBanner();
 }catch(e){}}
+function cacheScan(d){try{localStorage.setItem('td_scan',JSON.stringify(d));}catch(e){try{localStorage.setItem('td_scan',JSON.stringify(Object.assign({},d,{detail:{}})));}catch(e2){}}}
+function bootScan(){try{const s=localStorage.getItem('td_scan');if(!s)return;const d=JSON.parse(s);if(!d)return;window.__live=window.__live||{};window.__liveMeta=window.__liveMeta||{};overlayLive(d);renderDaily(d);}catch(e){}}
 async function dailyTick(){try{
   const [d,cal,news,weekly,quotes]=await Promise.all([
     fetch('/scan').then(r=>r.json()),
@@ -2372,10 +2374,10 @@ async function dailyTick(){try{
     fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);
   window.__live=(quotes&&quotes.quotes)||window.__live||{};window.__liveMeta=(quotes&&quotes.meta)||window.__liveMeta||{};
   overlayLive(d);
-  renderDaily(d);renderToday(cal,news);renderWeekly(weekly);
+  cacheScan(d);renderDaily(d);renderToday(cal,news);renderWeekly(weekly);
   const t=q('dTick');if(t){t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash');}
 }catch(e){}}
-setInterval(dailyTick,15000);dailyTick();renderIbkrDash();setInterval(renderIbkrDash,60000);
+bootScan();setInterval(dailyTick,15000);dailyTick();renderIbkrDash();setInterval(renderIbkrDash,60000);
 setInterval(liveTick,7000);
 const _qs=new URLSearchParams(location.search).get('sym');if(_qs)setTimeout(()=>{try{loadDetail(_qs.toUpperCase());}catch(e){}},1600);
 </script></body></html>"""
