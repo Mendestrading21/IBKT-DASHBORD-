@@ -42,11 +42,26 @@ WATCHLIST = ['AAPL', 'NVDA', 'MSFT', 'META', 'GOOGL', 'AMZN', 'AVGO', 'TSLA',
              # momentum / « qui cartonnent » (MAJ 26.06.2026) : AI infra, power, fintech, adtech, connectivité IA
              'HOOD', 'AXON', 'NET', 'MELI', 'RDDT', 'APP', 'ISRG',
              'GEV', 'VST', 'ALAB', 'CRDO', 'NBIS']
+# ─── UNIVERS ÉLARGI : ~110 plus grosses capitalisations US (S&P 500 / Nasdaq / Dow) ───
+# scanné automatiquement (cockpit, watchlist). Le streaming IBKR live, les news et les
+# fondamentaux restent sur le core WATCHLIST (57) → limites IBKR + perfs respectées.
+_BIG_EXTRA = [
+    'BRK-B', 'JNJ', 'PG', 'KO', 'PEP', 'ABBV', 'MRK', 'TMO', 'ABT', 'DHR', 'PFE', 'BMY',
+    'AMGN', 'GILD', 'VRTX', 'CVS', 'MDT',
+    'BAC', 'WFC', 'GS', 'MS', 'C', 'AXP', 'SCHW', 'BLK', 'SPGI', 'CB', 'PGR', 'BX',
+    'CSCO', 'IBM', 'INTC', 'TXN', 'ADI', 'LRCX', 'KLAC', 'MCHP', 'NXPI',
+    'DIS', 'CMCSA', 'T', 'VZ', 'TMUS',
+    'CAT', 'BA', 'HON', 'GE', 'RTX', 'LMT', 'DE', 'MMM', 'UPS', 'ETN',
+    'CVX', 'COP', 'SLB',
+    'MCD', 'NKE', 'SBUX', 'LOW', 'TJX', 'BKNG', 'PM', 'MO',
+    'GM', 'F', 'PYPL', 'LIN', 'ACN', 'TXT',
+]
+UNIVERSE = list(dict.fromkeys(WATCHLIST + _BIG_EXTRA))   # dédupliqué, ordre préservé
 BENCH = 'SPY'
 R = 0.045
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
-REFRESH_SEC = 60
+REFRESH_SEC = 90   # ~110 titres scannés → intervalle un peu plus large pour le plan gratuit
 
 app = Flask(__name__)
 scan_state = {'rows': [], 'detail': {}, 'portfolio': None, 'options_board': [], 'daily': None,
@@ -303,12 +318,12 @@ def backtest(data, lb=126, top_n=5, smin=58, eq0=100000.0):
 
 def scan():
     try:
-        data = yf.download(WATCHLIST + [BENCH, '^VIX', '^GSPC', '^IXIC', '^DJI', '^RUT'], period='1y', interval='1d',
+        data = yf.download(UNIVERSE + [BENCH, '^VIX', '^GSPC', '^IXIC', '^DJI', '^RUT'], period='1y', interval='1d',
                            progress=False, auto_adjust=True, group_by='ticker', threads=True)
         bc = data[BENCH]['Close'].dropna()
         bench_ret = (float(bc.iloc[-1]) / float(bc.iloc[-63]) - 1) if len(bc) > 63 else 0.0
         rows, detail = [], {}
-        for sym in WATCHLIST:
+        for sym in UNIVERSE:
             try:
                 df = data[sym].dropna()
                 if len(df) < 60:
