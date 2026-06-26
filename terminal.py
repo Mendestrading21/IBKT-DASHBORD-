@@ -69,6 +69,10 @@ _TREND_EXTRA = [
     'PLUG', 'FSLR', 'ENPH', 'RUN', 'DASH', 'ROKU', 'ABNB',
 ]
 UNIVERSE = list(dict.fromkeys(WATCHLIST + _BIG_EXTRA + _TREND_EXTRA))   # dédupliqué, ordre préservé
+# ─── COURS EN DIRECT IBKR (au bureau) : limite ~100 lignes de données IBKR ───
+# Priorité : core 57 + fast movers (trend) + plus grosses caps, plafonné à 95.
+# Les titres au-delà gardent leur dernier cours yfinance (scan), pas le tick live.
+LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 BENCH = 'SPY'
 R = 0.045
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
@@ -843,7 +847,7 @@ def _quotes_worker():
                 time.sleep(20)
                 continue
             ib.reqMarketDataType(1)      # 1 = temps réel (bascule auto en différé si pas d'abonnement)
-            cs = [Stock(s, 'SMART', 'USD') for s in WATCHLIST]
+            cs = [Stock(s, 'SMART', 'USD') for s in LIVE_SYMBOLS]
             ib.qualifyContracts(*cs)
             valid = [c for c in cs if getattr(c, 'conId', 0)]
             _live_meta.update({'connected': True, 'n': len(valid)})
