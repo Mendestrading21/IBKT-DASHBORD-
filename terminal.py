@@ -1628,6 +1628,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div id="dDetail" style="display:none;margin-bottom:14px"></div>
   <div class="stitle">📊 ÉTAT DU MARCHÉ</div>
   <div id="dVerdict" style="background:linear-gradient(135deg,#121212,#0a0a0a);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;margin:4px 0 14px">
+    <div id="dCmd" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #ffffff0d"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
       <div><div style="font-size:10px;letter-spacing:2px;color:#8794ab;font-weight:700;margin-bottom:6px">🧭 VERDICT DU JOUR</div>
       <div id="dVerdictTxt" style="font-size:17px;font-weight:800;letter-spacing:.3px">lecture du marché…</div></div>
@@ -1794,8 +1795,30 @@ function renderKPI(d){
     +card('🏆','Secteur leader',bs?bs.sector:'—','#FF8C32',bs?((bs.avg_change>=0?'+':'')+bs.avg_change+'% · sc '+bs.avg_score):'meilleur secteur')
     +card('📡','Scan',sn!=null?(sn+'/'+un):'—','#e8edf5',sn!=null?('analysés · MAJ '+(d.updated||'—')):'statut scan');
 }
+function donutScore(score,color){
+  const r=30,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(100,score))/100);
+  return `<svg viewBox="0 0 80 80" style="width:80px;height:80px;flex-shrink:0"><circle cx="40" cy="40" r="${r}" fill="none" stroke="#1a1a22" stroke-width="8"/><circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 40 40)" style="transition:stroke-dashoffset .6s ease"/><text x="40" y="39" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">${score}</text><text x="40" y="53" text-anchor="middle" font-size="8" fill="#8794ab">/100</text></svg>`;
+}
+function renderCmd(d){
+  const el=q('dCmd'); if(!el) return;
+  const mc=d.market_ctx||{}, br=mc.breadth||{};
+  let s=0;
+  s+=mc.spy_regime==='TREND'?35:mc.spy_regime==='NEUTRAL'?18:mc.spy_regime==='CHOP'?6:14;
+  s+=mc.roro==='RISK-ON'?25:mc.roro==='RISK-OFF'?2:mc.roro?12:12;
+  s+=Math.round((br.above50!=null?br.above50:50)/100*25);
+  s+=mc.vix_band==='calme'?15:mc.vix_band==='stress'?2:mc.vix_band?8:8;
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  const v=s>=65?['MARCHÉ FAVORABLE','#22C55E']:s>=40?['MARCHÉ NEUTRE','#FFB23F']:['MARCHÉ DANGEREUX','#EF4444'];
+  const gap=mc.roro_gap!=null?mc.roro_gap:0, rpos=Math.max(2,Math.min(98,(gap+30)/60*100));
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">${donutScore(s,v[1])}
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:9px;letter-spacing:2px;color:#8794ab;font-weight:700">🛰️ MARKET COMMAND CENTER · SCORE MARCHÉ</div>
+      <div style="font-size:22px;font-weight:900;color:${v[1]};line-height:1.1;margin:3px 0 9px">${v[0]}</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700"><span style="color:#EF4444">RISK-OFF</span><div style="flex:1;height:8px;border-radius:5px;background:linear-gradient(90deg,#EF4444,#FFB23F,#22C55E);position:relative"><div style="position:absolute;top:-2px;left:calc(${rpos}% - 6px);width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #0b0b0d;box-shadow:0 0 7px rgba(0,0,0,.7)"></div></div><span style="color:#22C55E">RISK-ON</span></div>
+    </div></div>`;
+}
 function renderDaily(d){
-  try{renderKPI(d);}catch(e){}
+  try{renderKPI(d);renderCmd(d);}catch(e){}
   const dy=d.daily||{}, sec=dy.sections||{}, DET=d.detail||{};
   const spk=s=>spark((DET[s]||{}).series&&DET[s].series.close);
   // VERDICT DU JOUR (contexte marché)
