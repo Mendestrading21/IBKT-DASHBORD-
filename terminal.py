@@ -56,12 +56,24 @@ _BIG_EXTRA = [
     'MCD', 'NKE', 'SBUX', 'LOW', 'TJX', 'BKNG', 'PM', 'MO',
     'GM', 'F', 'PYPL', 'LIN', 'ACN', 'TXT',
 ]
-UNIVERSE = list(dict.fromkeys(WATCHLIST + _BIG_EXTRA))   # dédupliqué, ordre préservé
+# ─── VALEURS « TREND » : celles qui font le buzz / momentum / fast movers ───
+# IA & quantum, nucléaire/énergie IA, crypto-mining, fintech, EV, meme stocks,
+# espace/défense, IPO chaudes. Très volatiles — pour repérer ce qui bouge.
+_TREND_EXTRA = [
+    'SOFI', 'AFRM', 'UPST', 'DKNG', 'RBLX', 'U', 'PINS', 'SNAP', 'LYFT',
+    'RIVN', 'LCID', 'NIO', 'GME', 'BABA', 'NU', 'GRAB',
+    'MARA', 'RIOT', 'CLSK', 'WULF', 'CIFR',
+    'IONQ', 'RGTI', 'QBTS', 'SOUN', 'BBAI', 'AI', 'PATH', 'DDOG', 'ZS', 'TTD',
+    'HIMS', 'TEM', 'CRWV', 'CART', 'CAVA', 'DJT',
+    'RKLB', 'OKLO', 'SMR', 'LUNR', 'ACHR', 'JOBY',
+    'PLUG', 'FSLR', 'ENPH', 'RUN', 'DASH', 'ROKU', 'ABNB',
+]
+UNIVERSE = list(dict.fromkeys(WATCHLIST + _BIG_EXTRA + _TREND_EXTRA))   # dédupliqué, ordre préservé
 BENCH = 'SPY'
 R = 0.045
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
-REFRESH_SEC = 90   # ~110 titres scannés → intervalle un peu plus large pour le plan gratuit
+REFRESH_SEC = 120   # ~170 titres scannés (core + big caps + trend) → intervalle large pour le plan gratuit
 
 app = Flask(__name__)
 scan_state = {'rows': [], 'detail': {}, 'portfolio': None, 'options_board': [], 'daily': None,
