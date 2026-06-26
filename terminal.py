@@ -3441,6 +3441,17 @@ function spark(arr){
   const up=a[a.length-1]>=a[0],col=up?'#22C55E':'#EF4444';
   return `<div style="margin-top:12px"><div class="muted" style="font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">Tendance 30 jours</div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:46px"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>`;
 }
+function alertOf(sym){
+  const d=(DATA.detail||{})[sym]; if(!d)return null;
+  const x=(DATA.quotes||{})[sym]; const price=x?x.last:d.price; const p=d.plan||{};
+  if(price==null)return null;
+  if(p.stop&&price<=p.stop)return['🛑','STOP TOUCHÉ','#EF4444','Cours sous ton stop — sortie selon le plan.'];
+  if(p.tp2&&price>=p.tp2)return['🎯','CIBLE 2 ATTEINTE','#22C55E','Objectif final atteint — pense à sécuriser.'];
+  if(p.tp1&&price>=p.tp1)return['🎯','CIBLE 1 ATTEINTE','#22C55E','Sécurise une partie / remonte ton stop.'];
+  if(p.stop&&price<=p.stop*1.025)return['⚠️','PROCHE DU STOP','#FFB23F','À moins de 2,5% du stop — surveille.'];
+  if(p.tp1&&price>=p.tp1*0.975)return['👀','PROCHE DE LA CIBLE 1','#38BDF8','Cible 1 en approche.'];
+  return null;
+}
 function card(sym){
   const d=(DATA.detail||{})[sym], x=(DATA.quotes||{})[sym];
   const price=x?x.last:(d?d.price:null), chg=(x&&x.change!=null)?x.change:(d?d.change:null);
@@ -3453,8 +3464,10 @@ function card(sym){
   const lvls=`<div class="lvls">${lvl('Entrée',p.entry,GOLD)}${lvl('Stop',p.stop,R)}${lvl('Résist.',p.resistance,BLUE)}${lvl('Cible 1',p.tp1,G)}${lvl('Cible 2',p.tp2,G)}${lvl('RSI',d.rsi!=null?d.rsi:null,'#cfd8e6').replace('$','')}</div>`;
   const dist=(toStop!=null&&toTp2!=null)?`<div class="muted" style="font-size:11px;margin-top:10px">🛡️ Stop à <b class="dn">-${toStop.toFixed(1)}%</b> · 🎯 Cible 2 à <b class="up">+${toTp2.toFixed(1)}%</b> du cours</div>`:'';
   const sp=(d.series&&d.series.close)?spark(d.series.close):'';
+  const al=alertOf(sym);
+  const alB=al?`<div style="margin-top:11px;background:${al[2]}1a;border:1px solid ${al[2]}55;border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">${al[0]}</span><div><div style="font-size:12px;font-weight:800;color:${al[2]}">${al[1]}</div><div class="muted" style="font-size:10.5px">${al[3]}</div></div></div>`:'';
   const acts=`<div class="acts"><a href="/titre/${sym}">📄 Fiche</a><a href="/options">💎 Options</a></div>`;
-  return `<div class="fav">${head}${meta}${sp}${lvls}${dist}${acts}</div>`;
+  return `<div class="fav"${al?` style="border-color:${al[2]}66"`:''}>${head}${alB}${meta}${sp}${lvls}${dist}${acts}</div>`;
 }
 function render(){
   const favs=getFavs();
@@ -3463,7 +3476,10 @@ function render(){
   document.getElementById('sug').innerHTML='<b>Ajout rapide :</b>'+SUG.filter(s=>!favs.includes(s)).map(s=>`<span onclick="addFav('${s}')">+ ${s}</span>`).join('');
   const host=document.getElementById('favs');
   if(!favs.length){host.innerHTML=`<div class="empty"><h3>⭐ Ta page est prête — ajoute tes titres</h3><div class="muted" style="font-size:13px;line-height:1.7;max-width:480px;margin:0 auto">Tape un ticker ci-dessus ou utilise l'ajout rapide. Pour chaque titre tu verras le cours, le score, la décision et tes niveaux clés (entrée, stop, cibles). Tes favoris restent sur ton iPhone.</div></div>`;return;}
-  host.innerHTML='<div class="favgrid">'+favs.map(card).join('')+'</div>';
+  const alerts=favs.map(alertOf).filter(Boolean);
+  const sumB=alerts.length?`<div style="background:linear-gradient(90deg,rgba(245,166,35,.14),transparent);border:1px solid #FFD27A44;border-radius:12px;padding:12px 16px;margin-top:14px;font-size:13px;font-weight:700;color:#FFD27A">🔔 ${alerts.length} alerte${alerts.length>1?'s':''} active${alerts.length>1?'s':''} sur tes favoris — voir les cartes surlignées ci-dessous</div>`:'';
+  const ordered=[...favs].sort((a,b)=>(alertOf(b)?1:0)-(alertOf(a)?1:0));
+  host.innerHTML=sumB+'<div class="favgrid">'+ordered.map(card).join('')+'</div>';
 }
 async function load(){try{const r=await Promise.all([fetch('/scan').then(r=>r.json()),fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);const s=r[0]||{},q=r[1]||{};DATA={detail:s.detail||{},quotes:(q&&q.quotes)||{},rt:!!(q&&q.meta&&q.meta.rt)};}catch(e){}render();}
 render();load();setInterval(load,20000);
