@@ -825,6 +825,26 @@ def ibkr_ep():
     return jsonify(_ibkr_snapshot())
 
 
+@app.route('/manifest.webmanifest')
+def manifest_ep():
+    """Manifeste PWA → permet « Ajouter à l'écran d'accueil » sur iPhone/Android
+    et l'ouverture en plein écran comme une vraie app."""
+    return jsonify({
+        'name': 'Trading Desk — Cockpit IBKR',
+        'short_name': 'Trading Desk',
+        'description': "Cockpit d'analyse trading (analyse only).",
+        'start_url': '/',
+        'scope': '/',
+        'display': 'standalone',
+        'orientation': 'portrait-primary',
+        'background_color': '#0b0e14',
+        'theme_color': '#0b0e14',
+        'icons': [
+            {'src': '/static/icon-180.png', 'sizes': '180x180', 'type': 'image/png', 'purpose': 'any maskable'},
+        ],
+    })
+
+
 @app.route('/')
 @app.route('/daily')
 def home():
@@ -879,7 +899,7 @@ def weekly_regen_ep():
 
 
 PAGE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRACK TERMINAL</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRACK TERMINAL</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#e8e8e8;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px}
@@ -960,6 +980,21 @@ body{color:#eaf0fa}
 .sc{font-weight:800}
 .ibtn{background:rgba(245,166,35,.1);color:#F5A623;border:1px solid #F5A62355;border-radius:7px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px}
 .ibtn:hover{background:rgba(245,166,35,.2)}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 <div class="top"><span class="brand">◣ TRACK TERMINAL</span>
 <a href="/daily" style="margin-left:16px;color:#FFD27A;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;border:1px solid #FFD27A55;padding:5px 12px;border-radius:8px">📅 DAILY</a>
@@ -1281,7 +1316,7 @@ setInterval(refresh,15000);refresh();
 
 
 PAGE_DAILY = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · DAILY WATCHLIST</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · DAILY WATCHLIST</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#cfd8e6;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -1393,7 +1428,22 @@ body{color:#eaf0fa}
 .scard thead th{font-size:10.5px;color:#8794ab}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-</head><body>
+<style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
+</style></head><body>
 <div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">◣ TRADING DESK</span><a href="/watchlist" style="margin-left:12px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">📋 Daily Watchlist</a><a href="/options" style="margin-left:8px;font-size:11px;font-weight:800;color:#FFD27A;text-decoration:none;border:1px solid #FFD27A55;padding:4px 11px;border-radius:8px;background:rgba(255,210,122,.06)">💎 Options Desk</a><a href="/entreprises" style="margin-left:8px;font-size:11px;font-weight:800;color:#7FB3FF;text-decoration:none;border:1px solid #38BDF855;padding:4px 11px;border-radius:8px;background:rgba(56,189,248,.06)">🏢 Analyse Entreprise</a><input id="dSearch" placeholder="🔍 Rechercher un titre…" onkeydown="if(event.key==='Enter'&&this.value.trim())location.href='/titre/'+this.value.trim().toUpperCase()" style="margin-left:10px;background:#0e0e0e;border:1px solid #2a2a30;color:#e8edf5;padding:5px 11px;border-radius:8px;font-size:11px;width:175px;outline:none"><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
 <div class="daily">
   <div class="dhead">
@@ -2034,7 +2084,7 @@ NAV = ('<div class="nav"><a href="/" class="navb">📈 Terminal</a>'
        '<span class="navtick" id="navTick"></span></div>')
 
 PAGE_SECTORS = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · SECTEURS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · SECTEURS</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#eaf0fa;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -2075,6 +2125,21 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:#ffffff06;cu
 .rvol{font-weight:700}.rvol.hot{color:#FFB23F}.rvol.warm{color:#F5A623}.rvol.cold{color:#8794ab}
 .spk{display:flex}svg.spark{overflow:visible}
 .foot{margin-top:30px;text-align:center;color:#8794ab;font-size:10.5px;letter-spacing:.6px;border-top:1px solid #ffffff10;padding-top:18px}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 __NAV__
 <div class="wrap">
@@ -2176,8 +2241,23 @@ function go(s){location.href='/analyse?sym='+s}
 """
 
 PAGE_NEWS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · News</title>
-<style>__CSS__</style></head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · News</title>
+<style>__CSS__</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
+</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>📰 NEWS · FLUX MARCHÉ LIVE</h1><div class="sub">Rafraîchi automatiquement chaque minute · traduit en français si la clé IA est active</div></div>
     <span class="live"><span class="d"></span><span id="nfresh">connexion…</span></span></div>
@@ -2199,8 +2279,23 @@ setInterval(nf,20000);nf();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_OPTIONS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Options</title>
-<style>__CSS__</style></head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Options</title>
+<style>__CSS__</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
+</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>💎 OPTIONS · LES MEILLEURES À TRAVAILLER</h1><div class="sub">Calls sélectionnés selon le marché · court / moyen / long · projection de gain si la cible est atteinte</div></div>
     <span class="live"><span class="d"></span><span id="ofresh">live</span></span></div>
@@ -2233,8 +2328,23 @@ setInterval(ro,15000);ro();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_CALENDAR = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Calendrier</title>
-<style>__CSS__</style></head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Calendrier</title>
+<style>__CSS__</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
+</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>🗓️ CALENDRIER · RÉSULTATS (EARNINGS)</h1><div class="sub">Prochaines publications des 57 leaders · crucial pour les options (risque IV-crush)</div></div>
     <span class="live"><span class="d"></span><span id="cfresh">…</span></span></div>
@@ -2308,8 +2418,23 @@ _WEEKLY_CSS = _BASE_CSS + """
 """
 
 PAGE_WEEKLY = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Semaine</title>
-<style>__CSS__</style></head><body>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Semaine</title>
+<style>__CSS__</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
+</style></head><body>
 <div class="wrap">
   <div class="head"><div>
     <div class="hero"><h1 style="margin:0">🎯 WATCHLIST DE LA SEMAINE</h1>
@@ -2545,7 +2670,7 @@ PAGE_WEEKLY = PAGE_WEEKLY.replace('<body>', '<body>' + _rail('/semaine'), 1)
 
 # ─── DAILY WATCHLIST (page poster auto, style intelligence quotidienne) ──────
 PAGE_WATCHLIST = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Daily Watchlist · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2582,6 +2707,21 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(245,166,35,.0
 .back{position:fixed;top:14px;left:14px;background:#111;border:1px solid #F5A62355;color:#FFD27A;padding:7px 13px;border-radius:9px;text-decoration:none;font-size:12px;font-weight:700;z-index:9}
 .src{font-size:9px;color:#454e5e;padding:5px 16px 10px;font-style:italic}
 @media print{.back{display:none}body{padding:0}}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
@@ -2672,7 +2812,7 @@ def watchlist_page():
 
 # ─── OPTIONS DESK (page complète : toutes les options à acheter / analyser) ──
 PAGE_OPTIONS_DESK = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Options Desk · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2704,6 +2844,21 @@ tbody tr{cursor:pointer;transition:background .15s}tbody tr:hover{background:rgb
 .foot{text-align:center;color:#5b6678;font-size:11px;margin:20px 0 6px}.foot b{color:#FFD27A}
 .src{font-size:9px;color:#454e5e;padding:6px 18px 10px;font-style:italic}
 @media print{.back{display:none}body{padding:0}}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
@@ -2785,7 +2940,7 @@ def options_desk_alias():
 
 # ─── ANALYSE ENTREPRISE (toutes les infos live + fondamentaux des sociétés) ──
 PAGE_ENTREPRISES = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Analyse Entreprise · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2811,6 +2966,21 @@ tbody tr{cursor:pointer;transition:background .12s}tbody tr:hover{background:rgb
 .back{position:fixed;top:13px;left:13px;background:#111;border:1px solid #38BDF855;color:#7FB3FF;padding:7px 13px;border-radius:9px;text-decoration:none;font-size:12px;font-weight:700;z-index:9}
 .foot{text-align:center;color:#5b6678;font-size:11px;margin:18px 0 6px}.foot b{color:#7FB3FF}
 @media print{.back{display:none}body{padding:0}}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
@@ -2887,7 +3057,7 @@ def entreprises_page():
 
 # ─── FICHE ENTREPRISE COMPLÈTE (page dédiée par titre) ──────────────────────
 PAGE_TITRE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Fiche · Trading Desk</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -2914,6 +3084,21 @@ td{padding:8px 10px;border-top:1px solid #141414}
 .fit{font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px}
 a.news{color:#9fc1ff;text-decoration:none}a.news:hover{text-decoration:underline}
 @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+</style><style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+}
 </style></head><body>
 <a class="back" href="/">← cockpit</a>
 <div class="wrap">
