@@ -3456,6 +3456,10 @@ function getFavs(){try{return JSON.parse(localStorage.getItem('myFavs')||'[]')}c
 function setFavs(a){localStorage.setItem('myFavs',JSON.stringify(a));render();}
 function addFav(s){s=(s||'').trim().toUpperCase().replace(/[^A-Z0-9.]/g,'');if(!s)return;var a=getFavs();if(!a.includes(s)){a.unshift(s);setFavs(a);}}
 function removeFav(s){setFavs(getFavs().filter(x=>x!==s));}
+function getNotes(){try{return JSON.parse(localStorage.getItem('myNotes')||'{}')}catch(e){return{}}}
+function openNote(s){window.__editing=s;render();const t=document.getElementById('nt_'+s);if(t)t.focus();}
+function cancelNote(){window.__editing=null;render();}
+function saveNote(s){const t=document.getElementById('nt_'+s);const v=t?t.value:'';const n=getNotes();if(v.trim())n[s]=v.trim();else delete n[s];localStorage.setItem('myNotes',JSON.stringify(n));window.__editing=null;render();}
 function addInput(){var i=document.getElementById('addq');addFav(i.value);i.value='';}
 let DATA={detail:{},quotes:{},rt:false};
 function lvl(l,v,c){return `<div class="lvl"><div class="l">${l}</div><div class="v" style="color:${c||'#e6edf7'}">${v!=null?'$'+v:'—'}</div></div>`}
@@ -3491,8 +3495,15 @@ function card(sym){
   const sp=(d.series&&d.series.close)?spark(d.series.close):'';
   const al=alertOf(sym);
   const alB=al?`<div style="margin-top:11px;background:${al[2]}1a;border:1px solid ${al[2]}55;border-radius:9px;padding:9px 12px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">${al[0]}</span><div><div style="font-size:12px;font-weight:800;color:${al[2]}">${al[1]}</div><div class="muted" style="font-size:10.5px">${al[3]}</div></div></div>`:'';
+  const note=(getNotes()[sym]||'').replace(/</g,'&lt;');
+  let noteEl;
+  if(window.__editing===sym){
+    noteEl=`<div style="margin-top:11px" onclick="event.stopPropagation()"><textarea id="nt_${sym}" placeholder="Prix d'achat, thèse, niveau à surveiller…" style="width:100%;background:#0a0a0a;border:1px solid #FFD27A55;border-radius:9px;color:#eaf0fa;font-size:12px;padding:8px 10px;min-height:54px;resize:vertical">${note}</textarea><div style="display:flex;gap:7px;margin-top:6px"><button onclick="saveNote('${sym}')" style="flex:1;background:rgba(255,210,122,.15);border:1px solid #FFD27A55;color:#FFD27A;border-radius:8px;padding:7px;font-weight:700;font-size:12px;cursor:pointer">💾 Enregistrer</button><button onclick="cancelNote()" style="background:#1a1a22;border:1px solid #2a2a33;color:#8794ab;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer">Annuler</button></div></div>`;
+  }else{
+    noteEl=`<div onclick="openNote('${sym}')" style="margin-top:11px;padding:9px 12px;background:#0c0c0c;border:1px dashed #262630;border-radius:9px;font-size:11.5px;color:${note?'#cfd8e6':'#5b6678'};cursor:pointer;line-height:1.5">${note?'📝 '+note:'✎ Ajouter une note perso'}</div>`;
+  }
   const acts=`<div class="acts"><a href="/titre/${sym}">📄 Fiche</a><a href="/options">💎 Options</a></div>`;
-  return `<div class="fav"${al?` style="border-color:${al[2]}66"`:''}>${head}${alB}${meta}${sp}${lvls}${dist}${acts}</div>`;
+  return `<div class="fav"${al?` style="border-color:${al[2]}66"`:''}>${head}${alB}${meta}${sp}${lvls}${dist}${noteEl}${acts}</div>`;
 }
 function render(){
   const favs=getFavs();
@@ -3506,7 +3517,7 @@ function render(){
   const ordered=[...favs].sort((a,b)=>(alertOf(b)?1:0)-(alertOf(a)?1:0));
   host.innerHTML=sumB+'<div class="favgrid">'+ordered.map(card).join('')+'</div>';
 }
-async function load(){try{const r=await Promise.all([fetch('/scan').then(r=>r.json()),fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);const s=r[0]||{},q=r[1]||{};DATA={detail:s.detail||{},quotes:(q&&q.quotes)||{},rt:!!(q&&q.meta&&q.meta.rt)};}catch(e){}render();}
+async function load(){try{const r=await Promise.all([fetch('/scan').then(r=>r.json()),fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);const s=r[0]||{},q=r[1]||{};DATA={detail:s.detail||{},quotes:(q&&q.quotes)||{},rt:!!(q&&q.meta&&q.meta.rt)};}catch(e){}if(!window.__editing)render();}
 render();load();setInterval(load,20000);
 </script></body></html>"""
 
