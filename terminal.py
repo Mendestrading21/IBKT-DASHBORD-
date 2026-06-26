@@ -1660,6 +1660,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div class="stitle">⚡ TON PLAN DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· recalculé en continu · tout l'univers + tes positions passés au crible · sur quoi travailler aujourd'hui</span></div>
   <div id="dPlan" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px;margin-bottom:22px"></div>
   <div id="dCapital" style="display:none"></div>
+  <div class="stitle">🧮 IBKR DECISION BOARD <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· répartition des décisions du moteur</span></div>
+  <div id="dDecBoard" style="margin-bottom:16px"></div>
   <div class="stitle">🎯 RECOMMANDATIONS IBKR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· score /40 · niveau S+/S/A/B · timing · clic → verdict complet</span></div>
   <div class="secgrid" id="dRecs"></div>
   <div class="stitle">📊 LES PLUS GROS MOUVEMENTS <span id="dMoversSess" style="font-weight:700;letter-spacing:0;font-size:11px"></span></div>
@@ -1936,7 +1938,7 @@ function renderDaily(d){
     <td><span class="grade ${gcls(r.grade)}">${r.grade}</span></td><td>${Math.round(r.rsi)}</td><td class="sub dn">${r.reason}</td></tr>`).join('')||er(5,"aucun titre à éviter");
 
   renderSectors(d); renderAnomalies(d); renderCharts(d);
-  window.__lastD=d; renderPositions(d); renderHero2(d); renderRisk(d); renderIndices(d); renderInternals(d); renderActionDuJour(d); renderPlan(d); renderCapitalPlan(d); renderRecs(d); renderMovers(d);
+  window.__lastD=d; renderPositions(d); renderHero2(d); renderRisk(d); renderIndices(d); renderInternals(d); renderActionDuJour(d); renderPlan(d); renderCapitalPlan(d); renderDecBoard(d); renderRecs(d); renderMovers(d);
 }
 function renderInternals(d){
   const el=document.getElementById('dInternals');if(!el)return;
@@ -2165,6 +2167,29 @@ function renderPlan(d){
 function nivCol(n){return n==='S+'?'#22C55E':n==='S'?'#34D399':n==='A'?'#F5B45B':n==='B'?'#FF8C32':'#EF4444'}
 function decCol(t){return t==='buy'?'#22C55E':t==='pullback'?'#34D399':t==='wait'?'#7FB3FF':'#EF4444'}
 function timLbl(s){return s==='BUY_NOW'?'✅ achat propre':s==='BUY_PULLBACK'?'⏳ sur repli':s==='WATCH_BREAKOUT'?'👀 sur cassure':s==='TOO_LATE'?'🛑 trop étendu':'éviter'}
+function recCat(r){
+  if(r.tone==='avoid')return 'avoid';
+  if(r.timing==='WATCH_BREAKOUT')return 'breakout';
+  if(r.tone==='pullback'||r.timing==='BUY_PULLBACK')return 'pullback';
+  if(r.tone==='buy'&&r.timing==='BUY_NOW')return 'buynow';
+  return 'watch';
+}
+function multiDonut(segs){
+  const total=segs.reduce((s,x)=>s+x.n,0)||1, r=30, c=2*Math.PI*r; let off=0;
+  const arcs=segs.filter(s=>s.n>0).map(s=>{const len=s.n/total*c;const el=`<circle cx="40" cy="40" r="${r}" fill="none" stroke="${s.color}" stroke-width="9" stroke-dasharray="${len.toFixed(1)} ${(c-len).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 40 40)"/>`;off+=len;return el;}).join('');
+  return `<svg viewBox="0 0 80 80" style="width:86px;height:86px;flex-shrink:0"><circle cx="40" cy="40" r="${r}" fill="none" stroke="#1a1a22" stroke-width="9"/>${arcs}<text x="40" y="38" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">${total}</text><text x="40" y="51" text-anchor="middle" font-size="7.5" fill="#8794ab">setups</text></svg>`;
+}
+function renderDecBoard(d){
+  const el=q('dDecBoard'); if(!el) return;
+  const recs=(d.recommendations||[]).filter(r=>r.score40>=18);
+  const cats=[['buynow','Acheter maintenant','#22C55E'],['pullback','Attendre repli','#34D399'],['breakout','Attendre cassure','#7FB3FF'],['watch','Surveiller','#FFB23F'],['avoid','Éviter','#EF4444']];
+  const by={}; cats.forEach(c=>by[c[0]]=[]);
+  recs.forEach(r=>{(by[recCat(r)]=by[recCat(r)]||[]).push(r);});
+  if(!recs.length){el.innerHTML='<div class="card" style="padding:16px"><span class="muted" style="font-size:12px">Aucune décision IBKR ≥18/40 — données en cours ou marché prudent.</span></div>';return;}
+  const segs=cats.map(c=>({n:(by[c[0]]||[]).length,color:c[2]}));
+  const legend=cats.map(c=>{const list=(by[c[0]]||[]).sort((a,b)=>b.score40-a.score40);const top=list.slice(0,5).map(r=>r.symbol).join(' · ');return `<div style="display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid #ffffff08"><span style="width:9px;height:9px;border-radius:2px;background:${c[2]};flex-shrink:0"></span><span style="font-size:11.5px;font-weight:700;color:${c[2]};min-width:138px">${c[1]}</span><b style="font-size:14px;min-width:22px">${list.length}</b><span class="muted" style="font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${top||'—'}</span></div>`;}).join('');
+  el.innerHTML=`<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px">${multiDonut(segs)}<div style="flex:1;min-width:250px">${legend}</div></div>`;
+}
 function renderRecs(d){
   const el=document.getElementById('dRecs');if(!el)return;
   const recs=(d.recommendations||[]).filter(r=>r.score40>=22).slice(0,8);
