@@ -1506,11 +1506,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div class="idxstrip" id="dIndices"></div>
   <div id="dDetail" style="display:none;margin-bottom:14px"></div>
   <div class="stitle">📊 ÉTAT DU MARCHÉ</div>
-  <div id="dVerdict" style="background:linear-gradient(90deg,#111111,#0a0a0a);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;margin:4px 0 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-    <div><div style="font-size:10px;letter-spacing:2px;color:#8794ab;font-weight:700;margin-bottom:6px">🧭 VERDICT DU JOUR</div>
-    <div id="dVerdictTxt" style="font-size:17px;font-weight:800;letter-spacing:.3px">lecture du marché…</div></div>
-    <div id="dTrend" style="text-align:center;min-width:158px;padding:0 6px"></div>
-    <div id="dVerdictTags" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  <div id="dVerdict" style="background:linear-gradient(135deg,#121212,#0a0a0a);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;margin:4px 0 14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+      <div><div style="font-size:10px;letter-spacing:2px;color:#8794ab;font-weight:700;margin-bottom:6px">🧭 VERDICT DU JOUR</div>
+      <div id="dVerdictTxt" style="font-size:17px;font-weight:800;letter-spacing:.3px">lecture du marché…</div></div>
+      <div id="dTrend" style="text-align:center;min-width:158px;padding:0 6px"></div>
+      <div id="dVerdictTags" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div id="dPartic" style="margin-top:15px;padding-top:14px;border-top:1px solid #ffffff0d"></div>
   </div>
   <div class="stitle">⭐ L'ACTION DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· le meilleur trade du jour, sélectionné par le moteur IBKR</span></div>
   <div id="dStar" style="margin-bottom:18px"></div>
@@ -1662,6 +1665,19 @@ function renderDaily(d){
     const vc=mc.vix_band==='calme'?'#F5A623':mc.vix_band==='stress'?'#EF4444':'#FFB23F';
     q('dVerdictTags').innerHTML=(mc.spy_regime?tag('RÉGIME',mc.spy_regime==='TREND'?'TENDANCE':mc.spy_regime==='CHOP'?'RANGE':'NEUTRE',rc):'')
       +(mc.roro?tag('',mc.roro,ro):'')+(mc.vix!=null?tag('VIX',mc.vix+(mc.vix_chg!=null?` (${mc.vix_chg>=0?'+':''}${mc.vix_chg}%)`:''),vc):'');
+  }
+  const pq=q('dPartic');
+  if(pq){const br=mc.breadth||{};const bb=(d.breadth!=null?d.breadth:(br.buy!=null?br.buy:0))||0;
+    const bcol=bb>=55?'#22C55E':bb>=40?'#F5A623':'#EF4444';
+    pq.innerHTML=`<div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">`
+      +`<span style="font-size:9.5px;letter-spacing:1.5px;color:#8794ab;font-weight:700;white-space:nowrap">PARTICIPATION</span>`
+      +`<div style="flex:1;min-width:140px;height:9px;border-radius:6px;background:#0a0a0a;overflow:hidden"><div style="height:100%;width:${bb}%;background:linear-gradient(90deg,#EF4444,#F5A623 55%,#22C55E);border-radius:6px"></div></div>`
+      +`<span style="font-weight:800;color:${bcol};font-size:15px;min-width:88px;text-align:right">${bb}% <span style="font-size:10px;color:#8794ab">ACHAT</span></span></div>`
+      +`<div class="muted" style="font-size:11px;margin-top:9px;display:flex;gap:14px;flex-wrap:wrap">`
+      +(br.above50!=null?`<span>📈 <b style="color:#cfd8e6">${br.above50}%</b> > MM50</span>`:'')
+      +(br.above200!=null?`<span><b style="color:#cfd8e6">${br.above200}%</b> > MM200</span>`:'')
+      +(br.adv!=null?`<span><b class="up">${br.adv}↑</b> / <b class="dn">${br.dec}↓</b></span>`:'')
+      +(br.nh!=null?`<span>🚀 ${br.nh} plus-hauts · ${br.nl} plus-bas (52s)</span>`:'')+`</div>`;
   }
   if(d.spy)q('dSpy').innerHTML=`SPY $${d.spy.price} ${chg(d.spy.change)}`;
   const m=d.market||{};const mk=q('dMkt');mk.className='pill '+(m.open?'live':'shut');
