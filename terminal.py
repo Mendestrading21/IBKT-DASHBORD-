@@ -1008,6 +1008,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -1479,6 +1486,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2216,6 +2230,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2356,6 +2377,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2417,6 +2445,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2489,6 +2524,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2602,6 +2644,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -2913,6 +2962,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -3149,6 +3205,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -3422,6 +3485,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -3584,6 +3654,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
@@ -3725,6 +3802,13 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+/* === design unifie (toutes pages) === */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.panel,.scard,.card,.pcard,.seccard,.tile,.kpi,.fav,.pchip,.stat{background:linear-gradient(165deg,#141414,#0c0c0c)!important;border-radius:14px!important}
+.panel,.scard,.card,.pcard,.fav,.seccard{transition:border-color .2s ease,box-shadow .2s ease!important}
+.panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{box-shadow:0 0 22px rgba(245,166,35,.07)}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+::selection{background:rgba(245,166,35,.26);color:#fff}
 </style>
 <script>
 (function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
