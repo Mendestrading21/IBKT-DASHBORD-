@@ -825,6 +825,26 @@ def ibkr_ep():
     return jsonify(_ibkr_snapshot())
 
 
+@app.route('/manifest.webmanifest')
+def manifest_ep():
+    """Manifeste PWA → permet « Ajouter à l'écran d'accueil » sur iPhone/Android
+    et l'ouverture en plein écran comme une vraie app."""
+    return jsonify({
+        'name': 'Trading Desk — Cockpit IBKR',
+        'short_name': 'Trading Desk',
+        'description': "Cockpit d'analyse trading (analyse only).",
+        'start_url': '/',
+        'scope': '/',
+        'display': 'standalone',
+        'orientation': 'portrait-primary',
+        'background_color': '#0b0e14',
+        'theme_color': '#0b0e14',
+        'icons': [
+            {'src': '/static/icon-180.png', 'sizes': '180x180', 'type': 'image/png', 'purpose': 'any maskable'},
+        ],
+    })
+
+
 @app.route('/')
 @app.route('/daily')
 def home():
@@ -879,7 +899,7 @@ def weekly_regen_ep():
 
 
 PAGE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRACK TERMINAL</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRACK TERMINAL</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#e8e8e8;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px}
@@ -1281,7 +1301,7 @@ setInterval(refresh,15000);refresh();
 
 
 PAGE_DAILY = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · DAILY WATCHLIST</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · DAILY WATCHLIST</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#cfd8e6;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -2034,7 +2054,7 @@ NAV = ('<div class="nav"><a href="/" class="navb">📈 Terminal</a>'
        '<span class="navtick" id="navTick"></span></div>')
 
 PAGE_SECTORS = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · SECTEURS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · SECTEURS</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#eaf0fa;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -2176,7 +2196,7 @@ function go(s){location.href='/analyse?sym='+s}
 """
 
 PAGE_NEWS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · News</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · News</title>
 <style>__CSS__</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>📰 NEWS · FLUX MARCHÉ LIVE</h1><div class="sub">Rafraîchi automatiquement chaque minute · traduit en français si la clé IA est active</div></div>
@@ -2199,7 +2219,7 @@ setInterval(nf,20000);nf();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_OPTIONS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Options</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Options</title>
 <style>__CSS__</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>💎 OPTIONS · LES MEILLEURES À TRAVAILLER</h1><div class="sub">Calls sélectionnés selon le marché · court / moyen / long · projection de gain si la cible est atteinte</div></div>
@@ -2233,7 +2253,7 @@ setInterval(ro,15000);ro();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_CALENDAR = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Calendrier</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Calendrier</title>
 <style>__CSS__</style></head><body>
 <div class="wrap">
   <div class="head"><div><h1>🗓️ CALENDRIER · RÉSULTATS (EARNINGS)</h1><div class="sub">Prochaines publications des 57 leaders · crucial pour les options (risque IV-crush)</div></div>
@@ -2308,7 +2328,7 @@ _WEEKLY_CSS = _BASE_CSS + """
 """
 
 PAGE_WEEKLY = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>TRADING DESK · Semaine</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Semaine</title>
 <style>__CSS__</style></head><body>
 <div class="wrap">
   <div class="head"><div>
@@ -2545,7 +2565,7 @@ PAGE_WEEKLY = PAGE_WEEKLY.replace('<body>', '<body>' + _rail('/semaine'), 1)
 
 # ─── DAILY WATCHLIST (page poster auto, style intelligence quotidienne) ──────
 PAGE_WATCHLIST = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Daily Watchlist · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2672,7 +2692,7 @@ def watchlist_page():
 
 # ─── OPTIONS DESK (page complète : toutes les options à acheter / analyser) ──
 PAGE_OPTIONS_DESK = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Options Desk · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2785,7 +2805,7 @@ def options_desk_alias():
 
 # ─── ANALYSE ENTREPRISE (toutes les infos live + fondamentaux des sociétés) ──
 PAGE_ENTREPRISES = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Analyse Entreprise · Trading Desk</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2887,7 +2907,7 @@ def entreprises_page():
 
 # ─── FICHE ENTREPRISE COMPLÈTE (page dédiée par titre) ──────────────────────
 PAGE_TITRE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
 <title>Fiche · Trading Desk</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
