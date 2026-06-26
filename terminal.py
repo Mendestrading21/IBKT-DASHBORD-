@@ -717,6 +717,7 @@ def scan_ep():
 
 
 @app.route('/healthz')
+@app.route('/api/healthz')
 def healthz():
     """Health check (Render) — toujours 200 si le process répond. Indique l'état
     du scan sans bloquer. Aucune donnée sensible, lecture seule."""
