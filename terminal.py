@@ -2763,6 +2763,23 @@ async function load(){
   document.getElementById('hsrc').textContent=(q&&q.meta&&q.meta.rt)?'TEMPS RÉEL IBKR':'yfinance différé ~15min';
   const byChg=rows.filter(r=>typeof r.change==='number').sort((a,b)=>b.change-a.change);
   const out=[];
+  // 0 — VUE MARCHÉ : bande indices + panneau macro (en-tête plateforme)
+  const mctx=s.market_ctx||{}, mbreadth=mctx.breadth||{}, idxs=s.indices||[];
+  const idxStrip=idxs.map(i=>{const pos=i.vix?(i.change<=0):(i.change>=0);const cc=pos?C.g:C.r;return `<div style="flex:1 1 100px;min-width:94px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:9px 12px"><div class="muted" style="font-size:9px;letter-spacing:.5px;text-transform:uppercase">${i.name}</div><div style="font-size:15px;font-weight:800;margin-top:2px">${(i.price||0).toLocaleString('fr-FR')}</div><div style="font-size:11px;font-weight:700;color:${cc}">${i.change>=0?'▲ +':'▼ '}${i.change}%</div></div>`}).join('');
+  if(idxStrip) out.push(`<div class="span2" style="display:flex;flex-wrap:wrap;gap:9px">${idxStrip}</div>`);
+  const mvReg=mctx.spy_regime, mvRegTxt=mvReg==='TREND'?'EN TENDANCE':mvReg==='CHOP'?'RANGE AGITÉ':mvReg==='NEUTRAL'?'NEUTRE':'—', mvRegC=mvReg==='TREND'?C.g:mvReg==='CHOP'?C.r:C.gold;
+  const mvVb=mctx.vix_band, mvVbC=mvVb==='calme'?C.g:mvVb==='normal'?C.gold:mvVb==='stress'?C.r:'#8794ab';
+  const mvRr=mctx.roro, mvRrC=mvRr==='RISK-ON'?C.g:mvRr==='RISK-OFF'?C.r:C.gold;
+  const mvStat=(l,v,sub)=>`<div style="flex:1 1 30%;min-width:140px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:10px 13px"><div class="muted" style="font-size:9px;letter-spacing:.5px;text-transform:uppercase">${l}</div><div style="font-size:15px;font-weight:800;margin-top:3px">${v}</div>${sub?`<div class="muted" style="font-size:10px;margin-top:2px">${sub}</div>`:''}</div>`;
+  const mvBody=`<div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px">
+    ${mvStat('Régime marché',`<span style="color:${mvRegC}">${mvRegTxt}</span>`,mctx.spy_adx!=null?`ADX ${mctx.spy_adx}`:'')}
+    ${mvStat('VIX · volatilité',`<span style="color:${mvVbC}">${mctx.vix!=null?mctx.vix:'—'}</span> <span class="muted" style="font-size:11px">${mvVb||''}</span>`,mctx.vix_chg!=null?`${mctx.vix_chg>=0?'+':''}${mctx.vix_chg}% vs hier`:'')}
+    ${mvStat('Risk-On / Risk-Off',`<span style="color:${mvRrC}">${mvRr||'—'}</span>`,mctx.roro_gap!=null?`écart cyclique/défensif ${mctx.roro_gap>=0?'+':''}${mctx.roro_gap}`:'')}
+    ${mvStat('Participation',`${mbreadth.above50!=null?mbreadth.above50:'—'}% <span class="muted" style="font-size:11px">&gt; MM50</span>`,`${mbreadth.above200!=null?mbreadth.above200:'—'}% &gt; MM200`)}
+    ${mvStat('Hausse / Baisse',`<span style="color:${C.g}">${mbreadth.adv!=null?mbreadth.adv:'—'}↑</span> · <span style="color:${C.r}">${mbreadth.dec!=null?mbreadth.dec:'—'}↓</span>`,'séance du jour')}
+    ${mvStat('Plus-hauts / Plus-bas',`<span style="color:${C.g}">${mbreadth.nh!=null?mbreadth.nh:'—'}</span> · <span style="color:${C.r}">${mbreadth.nl!=null?mbreadth.nl:'—'}</span>`,'sur 52 semaines')}
+  </div>`;
+  out.push(`<div class="panel span2" style="border-color:#38BDF833"><div class="ph" style="background:linear-gradient(90deg,#38BDF824,transparent 72%)"><span class="pn" style="background:#38BDF8">📊</span><span style="color:#fff;text-shadow:0 1px 2px #000">VUE MARCHÉ · MACRO</span><span style="margin-left:auto;font-size:10.5px;color:#8794ab;text-align:right">${mctx.verdict||''}</span></div>${mvBody}</div>`);
   // 1 — TOP 3
   const t3=byChg.slice(0,3).map((r,i)=>{const md=['#FFD27A','#c0c0c0','#cd7f32'][i];return `<div class="t3" style="border-color:${md}55"><div class="rk" style="color:${md}">#${i+1}</div><div class="tk">${r.symbol}</div><div class="mv ${r.change>=0?'up':'dn'}">${r.change>=0?'+':''}${r.change}%</div><div class="px">$${r.price} · RVOL ${(r.volx||1).toFixed(1)}x · ${(r.regime==='TREND'?'tendance':r.regime==='CHOP'?'range':'neutre')}</div></div>`;}).join('');
   out.push(panel(1,C.gold,'TOP 3 DU JOUR',`<div class="top3">${t3}</div>`,'Plus fortes hausses · cours '+((q&&q.meta&&q.meta.rt)?'live':'différé'),true));
@@ -2830,6 +2847,20 @@ async function load(){
   const secs=(s.sectors||[]).slice(0,4).map(x=>x.sector).join(' · ');
   const focus=mc.spy_regime==='TREND'?'Suivre la tendance · acheter la force · gap-hold':mc.spy_regime==='CHOP'?'Range agité · patience · éviter le chase':'Sélectif · attendre les confirmations';
   out.push(`<div class="panel span2" style="border-color:#F5A62333"><div class="ph" style="background:linear-gradient(90deg,#F5A62324,transparent 72%)"><span class="pn" style="background:#F5A623">★</span><span style="color:#fff;text-shadow:0 1px 2px #000">THÈMES DU MARCHÉ</span></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:16px"><div><div style="font-size:11px;font-weight:800;color:#FFD27A;margin-bottom:6px">🏛️ Secteurs forts</div><div style="font-size:12.5px;line-height:1.5">${secs||'—'}</div></div><div><div style="font-size:11px;font-weight:800;color:#FFD27A;margin-bottom:6px">🧭 Lecture du marché</div><div style="font-size:12.5px;line-height:1.5">${mc.verdict||'—'}</div></div><div><div style="font-size:11px;font-weight:800;color:#FFD27A;margin-bottom:6px">🎯 Focus du jour</div><div style="font-size:12.5px;line-height:1.5">${focus}</div></div></div></div>`);
+  // 12 — GUIDE / LÉGENDE DES INDICATEURS (comprendre le cockpit)
+  const gloss=[
+    ['📊 Score /100','Note technique globale du titre (tendance, momentum, structure). <b style="color:'+C.g+'">≥72</b> = fort · <b style="color:'+C.gold+'">55-71</b> = correct · <b style="color:'+C.r+'">&lt;55</b> = faible.'],
+    ['🎯 Score IBKR /40','Note du moteur de décision (technique + fondamentaux + option). Plus la note est haute, plus le dossier est complet.'],
+    ['🏅 Niveaux S+/S/A/B/C','Qualité du setup : <b>S+/S</b> = élite · <b>A</b> = solide · <b>B</b> = correct · <b>C</b> = à éviter.'],
+    ['⚡ RVOL','Volume relatif vs la moyenne. <b>&gt;1.5x</b> = activité anormale (intérêt fort). <b>~1x</b> = volume normal.'],
+    ['🌊 Régime','<b>Tendance</b> = mouvement directionnel (suivre) · <b>Range</b> = marché agité (patience) · <b>Neutre</b> = indécis.'],
+    ['💪 RS (force relative)','Performance du titre vs le marché. <b>&gt;50</b> = surperforme · <b>&lt;50</b> = sous-performe.'],
+    ['📈 Breadth MM50/MM200','% de valeurs au-dessus de leurs moyennes mobiles 50/200 jours = santé de la tendance de fond.'],
+    ['😱 VIX','Indice de la peur. <b style="color:'+C.g+'">&lt;16 calme</b> · <b style="color:'+C.gold+'">16-22 normal</b> · <b style="color:'+C.r+'">&gt;22 stress</b>.'],
+    ['⚖️ Risk-On / Risk-Off','<b style="color:'+C.g+'">Risk-On</b> = appétit pour le risque (cycliques forts) · <b style="color:'+C.r+'">Risk-Off</b> = fuite vers la sécurité.'],
+    ['✅ Verdicts','<b style="color:'+C.g+'">Achat</b> = signal favorable · <b style="color:'+C.blue+'">Surveiller</b> = attendre confirmation · <b style="color:'+C.r+'">Éviter</b> = pas maintenant.'],
+  ].map(g=>`<div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">${g[0]}</div><div class="muted" style="font-size:11px;line-height:1.55">${g[1]}</div></div>`).join('');
+  out.push(`<div class="panel span2" style="border-color:#A78BFA33"><div class="ph" style="background:linear-gradient(90deg,#A78BFA24,transparent 72%)"><span class="pn" style="background:#A78BFA">?</span><span style="color:#fff;text-shadow:0 1px 2px #000">GUIDE · COMPRENDRE LES INDICATEURS</span></div><div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px">${gloss}</div><div class="src">Repère pédagogique — analyse éducative, jamais un conseil financier. Aucun ordre passé — lecture seule.</div></div>`);
   document.getElementById('grid').innerHTML=out.join('');
 }
 load();setInterval(load,20000);
