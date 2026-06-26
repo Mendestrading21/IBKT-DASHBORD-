@@ -2795,6 +2795,37 @@ async function load(){
   const mc=s.market_ctx||{};
   const cry=['COIN','MSTR'].map(sy=>rows.find(r=>r.symbol===sy)).filter(Boolean).map(r=>`<tr><td class="sym">${r.symbol}</td><td>$${r.price}</td><td class="${r.change>=0?'up':'dn'}">${r.change>=0?'+':''}${r.change}%</td><td class="muted">RVOL ${(r.volx||1).toFixed(1)}x</td></tr>`);
   out.push(panel(10,C.o,'CRYPTO / RISK-ON · '+(mc.roro||'—'),tbl(['Ticker','Prix','Var','Volume'],cry),'COIN/MSTR = proxy appétit pour le risque · VIX '+(mc.vix!=null?mc.vix:'—')));
+  // 11 — ROTATION SECTORIELLE (détaillé : 1 carte par secteur)
+  const SCc=(v)=>v>=72?C.g:v>=55?C.gold:C.r;
+  const secCards=(s.sectors||[]).map((x,i)=>{
+    const sc=x.avg_score||0, dl=x.delta, chg=x.avg_change||0;
+    const dtxt=dl==null?'<span class="muted" style="font-size:10px">stable</span>':(dl>0?`<span style="color:${C.g};font-weight:800">▲ +${dl}</span>`:dl<0?`<span style="color:${C.r};font-weight:800">▼ ${dl}</span>`:'<span class="muted" style="font-size:10px">=</span>');
+    const rb=x.risk_band, rc=rb==='Low'?C.g:rb==='Med'?C.gold:C.r, ld=x.leader||{};
+    const stat=(l,v)=>`<div style="flex:1 1 44%;min-width:118px;background:#0c0c0c;border:1px solid #161616;border-radius:8px;padding:6px 9px"><div class="muted" style="font-size:8.5px;letter-spacing:.5px;text-transform:uppercase">${l}</div><div style="font-size:12.5px;font-weight:700;margin-top:1px">${v}</div></div>`;
+    const mem=(x.members||[]).slice(0,12).map(m=>`<span style="font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px;border:1px solid ${(m.change||0)>=0?C.g+'55':C.r+'55'};color:${(m.change||0)>=0?C.g:C.r}">${m.symbol}</span>`).join(' ');
+    return `<div style="border:1px solid #1c1c24;border-radius:12px;background:linear-gradient(165deg,#121212,#0b0b0b);padding:13px 14px">
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="font-size:13px;font-weight:900;color:#5b6678">#${i+1}</span>
+        <span style="font-size:18px">${x.icon||'•'}</span>
+        <span style="font-size:14px;font-weight:800;color:#fff">${x.sector}</span>
+        <span class="muted" style="font-size:10px">· ${x.n} val.</span>
+        <span style="margin-left:auto;font-size:22px;font-weight:900;color:${SCc(sc)}">${sc}</span>
+        <span style="font-size:11px">${dtxt}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:11px">
+        ${stat('Tendance jour',`<span style="color:${chg>=0?C.g:C.r}">${chg>=0?'+':''}${chg}%</span>`)}
+        ${stat('% Achat',`${x.pct_buy}% <span class="muted" style="font-size:9.5px">(${x.n_buy}B·${x.n_watch}W·${x.n_avoid}A)</span>`)}
+        ${stat('Breadth MM50',`<span style="color:${SCc(x.b50)}">${x.b50}%</span>`)}
+        ${stat('Breadth MM200',`<span style="color:${SCc(x.b200)}">${x.b200}%</span>`)}
+        ${stat('Force relative',`RS ${x.avg_rs}`)}
+        ${stat('Volume (RVOL)',`${x.avg_rvol}x`)}
+        ${stat('Risque',`<span style="color:${rc}">${rb}</span>`)}
+        ${stat('Leader',`<b style="color:#fff">${ld.symbol||'—'}</b> ${ld.score!=null?`<span style="color:${SCc(ld.score)}">${ld.score}</span>`:''}`)}
+      </div>
+      ${mem?`<div style="margin-top:10px"><div class="muted" style="font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Membres · par force</div><div style="display:flex;flex-wrap:wrap;gap:5px">${mem}</div></div>`:''}
+    </div>`;
+  }).join('');
+  out.push(`<div class="panel span2" style="border-color:#34D39933"><div class="ph" style="background:linear-gradient(90deg,#34D39924,transparent 72%)"><span class="pn" style="background:#34D399">⚡</span><span style="color:#fff;text-shadow:0 1px 2px #000">ROTATION SECTORIELLE · 9 SECTEURS</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:13px;padding:14px">${secCards||'<div class="muted" style="padding:10px">—</div>'}</div><div class="src">Classé par score moyen · ▲/▼ = variation du score vs hier · Breadth = % du secteur au-dessus de sa moyenne mobile (MM50/MM200) · RS = force relative vs marché · B/W/A = Achat/Surveiller/Éviter</div></div>`);
   // THÈMES DU MARCHÉ
   const secs=(s.sectors||[]).slice(0,4).map(x=>x.sector).join(' · ');
   const focus=mc.spy_regime==='TREND'?'Suivre la tendance · acheter la force · gap-hold':mc.spy_regime==='CHOP'?'Range agité · patience · éviter le chase':'Sélectif · attendre les confirmations';
