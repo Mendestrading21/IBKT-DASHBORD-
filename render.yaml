@@ -1,0 +1,16 @@
+# Déploiement cloud (Render.com) — dashboard d'analyse, sans IBKR live (pas de TWS sur le cloud).
+# Sur Render : New + → Blueprint → choisir ce repo → Render lit ce fichier.
+services:
+  - type: web
+    name: trading-desk
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python terminal.py
+    envVars:
+      - key: NO_IBKR        # désactive la connexion IBKR (pas de TWS sur le cloud)
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      # - key: ANTHROPIC_API_KEY   # (optionnel) à ajouter dans l'interface Render pour les news FR
+      #   sync: false

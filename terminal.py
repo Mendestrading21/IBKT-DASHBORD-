@@ -44,6 +44,8 @@ WATCHLIST = ['AAPL', 'NVDA', 'MSFT', 'META', 'GOOGL', 'AMZN', 'AVGO', 'TSLA',
              'GEV', 'VST', 'ALAB', 'CRDO', 'NBIS']
 BENCH = 'SPY'
 R = 0.045
+# IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
+IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 REFRESH_SEC = 60
 
 app = Flask(__name__)
@@ -725,6 +727,10 @@ def _ibkr_worker(res):
 
 
 def _ibkr_snapshot():
+    if not IBKR_ENABLED:
+        return {'connected': False, 'error': 'IBKR désactivé (cloud — pas de TWS)', 'mode': None,
+                'account': None, 'net_liq': None, 'cash': None, 'buying_power': None,
+                'upnl': None, 'currency': None, 'positions': []}
     now = time.time()
     if _ibkr_cache['data'] and now - _ibkr_cache['ts'] < 15:
         return _ibkr_cache['data']
@@ -2996,14 +3002,31 @@ def titre_page(sym):
     return PAGE_TITRE
 
 
-if __name__ == '__main__':
+def _start_app():
     threading.Thread(target=_loop, daemon=True).start()
     threading.Thread(target=_opt_loop, daemon=True).start()
     threading.Thread(target=_news_loop, daemon=True).start()
     threading.Thread(target=_cal_loop, daemon=True).start()
     threading.Thread(target=_weekly_loop, daemon=True).start()
     threading.Thread(target=_fund_loop, daemon=True).start()
-    threading.Thread(target=_quotes_worker, daemon=True).start()
-    # host 0.0.0.0 = accessible depuis le réseau local (iPhone, tablette…) sur http://IP-DU-PC:5002
-    print('TRACK TERMINAL -> http://localhost:5002  ·  réseau local : http://<IP-DU-PC>:5002  (Ctrl+C pour arreter)')
-    app.run(host='0.0.0.0', port=5002, debug=False, use_reloader=False, threaded=True)
+    if IBKR_ENABLED:                                  # pas de TWS sur le cloud → on n'essaie pas
+        threading.Thread(target=_quotes_worker, daemon=True).start()
+    port = int(os.environ.get('PORT', 5002))          # le cloud (Render…) impose le port via $PORT
+    # host 0.0.0.0 = accessible réseau local (iPhone) ET cloud
+    print(f'TRACK TERMINAL -> http://localhost:{port}  ·  IBKR live: {IBKR_ENABLED}  (Ctrl+C pour arreter)')
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False, threaded=True)
+
+
+# démarre les threads dès l'import (pour gunicorn/cloud) si demandé, sinon en __main__
+if os.environ.get('START_ON_IMPORT') == '1':
+    threading.Thread(target=_loop, daemon=True).start()
+    threading.Thread(target=_opt_loop, daemon=True).start()
+    threading.Thread(target=_news_loop, daemon=True).start()
+    threading.Thread(target=_cal_loop, daemon=True).start()
+    threading.Thread(target=_weekly_loop, daemon=True).start()
+    threading.Thread(target=_fund_loop, daemon=True).start()
+    if IBKR_ENABLED:
+        threading.Thread(target=_quotes_worker, daemon=True).start()
+
+if __name__ == '__main__':
+    _start_app()
