@@ -1010,7 +1010,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -1481,7 +1481,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2201,7 +2201,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2341,7 +2341,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2402,7 +2402,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2474,7 +2474,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2587,7 +2587,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -2898,7 +2898,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -3134,7 +3134,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -3310,6 +3310,147 @@ def options_desk_alias():
     return PAGE_OPTIONS_DESK
 
 
+# ─── MA PAGE (espace perso : favoris + niveaux clés, sauvegardé sur l'appareil) ──
+PAGE_ME = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Ma Page · Trading Desk</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1200px 600px at 50% -10%,#15130a,#070707 60%);color:#e8edf5;font-family:'Segoe UI',system-ui,sans-serif;padding:20px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1320px;margin:0 auto}
+.htop{border:2px solid #FFD27A55;border-radius:18px;padding:18px 24px;background:linear-gradient(135deg,#15110a,#0b0b0b);display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:0 0 40px rgba(255,210,122,.08)}
+.htitle{font-size:32px;font-weight:900;letter-spacing:1px;background:linear-gradient(180deg,#FFE9B8,#F5A623);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hsub{color:#8794ab;font-weight:700;font-size:13px;margin-top:4px}
+.hmeta{margin-left:auto;text-align:right;font-size:11px;color:#8794ab;line-height:1.7}.hmeta b{color:#FFD27A}
+.addbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0 6px;background:#101010;border:1px solid #1c1c24;border-radius:12px;padding:12px 14px}
+.addbar input{background:#0a0a0a;border:1px solid #1c1c24;color:#eaf0fa;border-radius:9px;padding:9px 13px;font-size:14px;flex:1;min-width:150px}
+.addbar button{background:rgba(255,210,122,.14);border:1px solid #FFD27A66;color:#FFD27A;border-radius:9px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.sug{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.sug b{color:#6b7689;font-size:11px;align-self:center;margin-right:2px}
+.sug span{background:#0e0e0e;border:1px solid #1c1c24;color:#cfd8e6;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+.sug span:hover{border-color:#FFD27A66;color:#FFD27A}
+.favgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:14px}
+.fav{border:1px solid #1c1c24;border-radius:14px;background:linear-gradient(165deg,#131313,#0b0b0b);padding:15px 16px;animation:fu .4s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fav .top{display:flex;align-items:center;gap:10px}
+.fav .tk{font-size:21px;font-weight:900;color:#fff;text-decoration:none}
+.fav .px{font-size:16px;font-weight:800}
+.fav .rm{margin-left:auto;background:#1a1212;border:1px solid #EF444444;color:#EF4444;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px;font-weight:800;flex-shrink:0}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:7px}
+.lvls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px}
+.lvl{background:#0c0c0c;border:1px solid #161616;border-radius:9px;padding:8px 10px;text-align:center}
+.lvl .l{font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;color:#6b7689}
+.lvl .v{font-size:14px;font-weight:800;margin-top:2px}
+.rrbar{display:flex;height:7px;border-radius:5px;overflow:hidden;margin-top:12px;background:#0a0a0a}
+.fav .acts{display:flex;gap:7px;margin-top:12px}
+.fav .acts a{flex:1;text-align:center;text-decoration:none;font-size:12px;font-weight:700;padding:8px;border-radius:9px;border:1px solid #1c1c24;color:#cfd8e6}
+.fav .acts a:hover{border-color:#FFD27A55;color:#FFD27A}
+.muted{color:#6b7689}.up{color:#22C55E;font-weight:700}.dn{color:#EF4444;font-weight:700}
+.empty{border:1.5px dashed #2a2a33;border-radius:16px;padding:40px 22px;text-align:center;margin-top:16px}
+.empty h3{font-size:18px;color:#FFD27A;margin-bottom:8px}
+.foot{text-align:center;color:#5b6678;font-size:11px;margin:22px 0 6px}.foot b{color:#FFD27A}
+.back{position:fixed;top:13px;left:13px;background:#111;border:1px solid #FFD27A55;color:#FFD27A;padding:7px 13px;border-radius:9px;text-decoration:none;font-size:12px;font-weight:700;z-index:9}
+</style>
+<style id="m-fix">
+html,body{overflow-x:hidden;max-width:100%}
+@media(max-width:640px){
+  .grid,.cols,.herorow,.hero,.panorama,.layout,.heat,.secgrid,.poster{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .top3{grid-template-columns:1fr 1fr 1fr!important}
+  .plan{grid-template-columns:1fr 1fr!important}
+  td,th{padding-left:9px!important;padding-right:9px!important}
+  table{font-size:11.5px!important}
+  .wrap,.daily{padding-left:12px!important;padding-right:12px!important}
+  .phead-top{padding:15px 16px!important}
+  .htitle{font-size:25px!important}
+  .hmeta{margin-left:0!important;text-align:left!important}
+  .back{padding:5px 9px!important;font-size:11px!important}
+  .lvls{grid-template-columns:1fr 1fr 1fr!important}
+}
+</style>
+<style id="nav-css">
+#gnav{position:sticky;top:0;z-index:1000;background:rgba(10,10,12,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #1c1c24}
+.gnav-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.gnav-links{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+#gnav a{color:#aab4c4;text-decoration:none;font-size:13px;font-weight:700;padding:7px 12px;border-radius:9px;white-space:nowrap}
+#gnav a:hover{background:#ffffff0d;color:#fff}
+#gnav a.act{background:rgba(255,210,122,.14);color:#FFD27A}
+.gnav-search{display:flex;gap:6px;align-items:center}
+.gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
+.gnav-search button{background:rgba(255,210,122,.12);border:1px solid #FFD27A55;color:#FFD27A;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
+.back{display:none!important}
+@media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
+</style>
+<script>
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
+var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
+var nav=document.createElement('nav');nav.id='gnav';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+document.body.insertBefore(nav,document.body.firstChild);}
+window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
+</script></head><body>
+<a class="back" href="/">← cockpit</a>
+<div class="wrap">
+  <div class="htop"><span style="font-size:36px">⭐</span>
+    <div><div class="htitle">MON ESPACE</div><div class="hsub">Tes titres favoris · niveaux clés · sauvegardés sur cet appareil</div></div>
+    <div class="hmeta"><div><b id="cnt">…</b> suivis</div><div>Cours <b id="src">…</b></div><div style="font-size:10px;color:#5b6678;margin-top:3px">Analyse éducative — pas un conseil · ⛔ aucun ordre</div></div>
+  </div>
+  <div class="addbar">
+    <input id="addq" placeholder="Ajouter un titre (ex: NVDA, AAPL…)" autocomplete="off" onkeydown="if(event.key==='Enter')addInput()">
+    <button onclick="addInput()">+ Ajouter</button>
+  </div>
+  <div class="sug" id="sug"></div>
+  <div id="favs"></div>
+  <div class="foot">⭐ Tes favoris sont enregistrés <b>uniquement sur cet appareil</b> (rien n'est envoyé). Niveaux = plan technique du moteur · cours yfinance différé sur le cloud.</div>
+</div>
+<script>
+const G='#22C55E',R='#EF4444',GOLD='#FFD27A',BLUE='#38BDF8',CY='#34D399';
+const SUG=['NVDA','AAPL','TSLA','MSFT','AMD','META','GOOGL','AMZN','PLTR','AVGO'];
+function vcol(v){return v==='BUY'?G:v==='WATCH'?GOLD:v==='WAIT'?BLUE:v==='AVOID'?R:'#8794ab'}
+function vfr(v){return {BUY:'✅ ACHAT',WATCH:'👀 SURVEILLER',WAIT:'⏳ ATTENTE',AVOID:'🛑 ÉVITER'}[v]||v||'—'}
+function getFavs(){try{return JSON.parse(localStorage.getItem('myFavs')||'[]')}catch(e){return[]}}
+function setFavs(a){localStorage.setItem('myFavs',JSON.stringify(a));render();}
+function addFav(s){s=(s||'').trim().toUpperCase().replace(/[^A-Z0-9.]/g,'');if(!s)return;var a=getFavs();if(!a.includes(s)){a.unshift(s);setFavs(a);}}
+function removeFav(s){setFavs(getFavs().filter(x=>x!==s));}
+function addInput(){var i=document.getElementById('addq');addFav(i.value);i.value='';}
+let DATA={detail:{},quotes:{},rt:false};
+function lvl(l,v,c){return `<div class="lvl"><div class="l">${l}</div><div class="v" style="color:${c||'#e6edf7'}">${v!=null?'$'+v:'—'}</div></div>`}
+function card(sym){
+  const d=(DATA.detail||{})[sym], x=(DATA.quotes||{})[sym];
+  const price=x?x.last:(d?d.price:null), chg=(x&&x.change!=null)?x.change:(d?d.change:null);
+  const head=`<div class="top"><a class="tk" href="/titre/${sym}">${sym}</a>${price!=null?`<span class="px">$${price}</span>`:''}${chg!=null?`<span class="${chg>=0?'up':'dn'}" style="font-size:13px">${chg>=0?'+':''}${chg}%</span>`:''}<button class="rm" onclick="removeFav('${sym}')" title="Retirer">×</button></div>`;
+  if(!d){return `<div class="fav">${head}<div class="muted" style="font-size:12px;margin-top:12px;line-height:1.6">Hors des 57 titres suivis en direct.<br>Ouvre la fiche pour l'analyse technique + fondamentale complète.</div><div class="acts"><a href="/titre/${sym}">📄 Voir la fiche complète</a></div></div>`;}
+  const p=d.plan||{}, sc=d.score||0, scol=sc>=72?G:sc>=55?GOLD:R;
+  const toStop=(price&&p.stop)?((price-p.stop)/price*100):null;
+  const toTp2=(price&&p.tp2)?((p.tp2-price)/price*100):null;
+  const meta=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:11px"><span class="badge" style="color:${scol};border:1px solid ${scol}55">Score ${sc}/100</span>${d.grade?`<span class="badge muted" style="border:1px solid #2a2a33">Grade ${d.grade}</span>`:''}<span class="badge" style="color:${vcol(d.verdict)};background:${vcol(d.verdict)}1a">${vfr(d.verdict)}</span></div>`;
+  const lvls=`<div class="lvls">${lvl('Entrée',p.entry,GOLD)}${lvl('Stop',p.stop,R)}${lvl('Résist.',p.resistance,BLUE)}${lvl('Cible 1',p.tp1,G)}${lvl('Cible 2',p.tp2,G)}${lvl('RSI',d.rsi!=null?d.rsi:null,'#cfd8e6').replace('$','')}</div>`;
+  const dist=(toStop!=null&&toTp2!=null)?`<div class="muted" style="font-size:11px;margin-top:10px">🛡️ Stop à <b class="dn">-${toStop.toFixed(1)}%</b> · 🎯 Cible 2 à <b class="up">+${toTp2.toFixed(1)}%</b> du cours</div>`:'';
+  const acts=`<div class="acts"><a href="/titre/${sym}">📄 Fiche</a><a href="/options">💎 Options</a></div>`;
+  return `<div class="fav">${head}${meta}${lvls}${dist}${acts}</div>`;
+}
+function render(){
+  const favs=getFavs();
+  document.getElementById('cnt').textContent=favs.length;
+  document.getElementById('src').innerHTML=DATA.rt?'<b style="color:#22C55E">TEMPS RÉEL IBKR</b>':'yfinance différé';
+  document.getElementById('sug').innerHTML='<b>Ajout rapide :</b>'+SUG.filter(s=>!favs.includes(s)).map(s=>`<span onclick="addFav('${s}')">+ ${s}</span>`).join('');
+  const host=document.getElementById('favs');
+  if(!favs.length){host.innerHTML=`<div class="empty"><h3>⭐ Ta page est prête — ajoute tes titres</h3><div class="muted" style="font-size:13px;line-height:1.7;max-width:480px;margin:0 auto">Tape un ticker ci-dessus ou utilise l'ajout rapide. Pour chaque titre tu verras le cours, le score, la décision et tes niveaux clés (entrée, stop, cibles). Tes favoris restent sur ton iPhone.</div></div>`;return;}
+  host.innerHTML='<div class="favgrid">'+favs.map(card).join('')+'</div>';
+}
+async function load(){try{const r=await Promise.all([fetch('/scan').then(r=>r.json()),fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);const s=r[0]||{},q=r[1]||{};DATA={detail:s.detail||{},quotes:(q&&q.quotes)||{},rt:!!(q&&q.meta&&q.meta.rt)};}catch(e){}render();}
+render();load();setInterval(load,20000);
+</script></body></html>"""
+
+
+@app.route('/ma-page')
+@app.route('/moi')
+def my_page():
+    return PAGE_ME
+
+
 # ─── ANALYSE ENTREPRISE (toutes les infos live + fondamentaux des sociétés) ──
 PAGE_ENTREPRISES = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
@@ -3368,7 +3509,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
@@ -3509,7 +3650,7 @@ html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
