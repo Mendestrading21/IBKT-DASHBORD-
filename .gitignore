@@ -1,0 +1,15 @@
+# Secrets — NE JAMAIS commiter
+.env
+
+# État local (diff jour/jour du brief)
+daily_prev.json
+
+# Snapshot hebdo figé (watchlist de la semaine)
+weekly_snapshot.json
+weekly_snapshot.json.tmp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
