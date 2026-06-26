@@ -2905,6 +2905,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;padding:8px 12px;font-size:9px;letter-spacing:.5px;color:#6b7689;text-transform:uppercase;font-weight:700;white-space:nowrap}
 td{padding:9px 12px;border-top:1px solid #141414;white-space:nowrap}
 tbody tr{cursor:pointer;transition:background .15s}tbody tr:hover{background:rgba(255,210,122,.06)}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.swipe{display:none;font-size:10px;color:#5b6678;padding:0 18px 8px}
+@media(max-width:640px){.swipe{display:block}}
 .sym{font-weight:800;color:#fff}.muted{color:#6b7689}.up{color:#22C55E;font-weight:700}.dn{color:#EF4444;font-weight:700}
 .fit{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:6px}
 .back{position:fixed;top:13px;left:13px;background:#111;border:1px solid #FFD27A55;color:#FFD27A;padding:7px 13px;border-radius:9px;text-decoration:none;font-size:12px;font-weight:700;z-index:9}
@@ -2941,6 +2944,17 @@ html,body{overflow-x:hidden;max-width:100%}
   <div id="feat"></div>
   <div class="stats" id="stats"></div>
   <div id="sections"></div>
+  <div class="panel" style="border-color:#A78BFA33"><div class="ph" style="background:linear-gradient(90deg,#A78BFA26,transparent 70%)"><span style="color:#fff">📚 GUIDE OPTIONS · COMPRENDRE CHAQUE COLONNE</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px">
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">💎 Qualité /100</div><div class="muted" style="font-size:11px;line-height:1.55">Note globale du contrat : liquidité, spread, delta, échéance, IV. <b style="color:#22C55E">≥78</b> excellent · <b style="color:#FFD27A">62-77</b> bon · <b style="color:#EF4444">&lt;50</b> à éviter.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">Δ Delta</div><div class="muted" style="font-size:11px;line-height:1.55">Sensibilité au titre : delta 0.70 = l’option gagne ~0,70$ quand l’action monte de 1$. Plus haut = plus directionnel.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">🎯 POP &amp; Proba cible</div><div class="muted" style="font-size:11px;line-height:1.55">POP = probabilité d’être en profit à l’échéance. Proba cible = chance d’atteindre l’objectif du titre. Plus c’est haut, mieux c’est.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">⚠️ Danger</div><div class="muted" style="font-size:11px;line-height:1.55">Risque global combiné : érosion théta + faible POP + earnings proches + IV chère + court terme. <b style="color:#22C55E">Faible</b> → <b style="color:#EF4444">Extrême</b>.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">⏳ Théta &amp; IV</div><div class="muted" style="font-size:11px;line-height:1.55">Théta = valeur perdue chaque jour (le temps joue contre l’acheteur). IV = volatilité implicite : haute = options chères.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">⚖️ Breakeven &amp; Coût</div><div class="muted" style="font-size:11px;line-height:1.55">Breakeven = cours du titre pour rentrer dans tes frais. Coût = prix d’un contrat (= 100 actions). « Si cible » = gain si l’objectif est atteint.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">📏 Move attendu</div><div class="muted" style="font-size:11px;line-height:1.55">Amplitude anticipée par le marché d’ici l’échéance (±%), déduite de l’IV. Repère pour juger si une cible est réaliste.</div></div>
+    <div style="flex:1 1 30%;min-width:235px;background:#0c0c0c;border:1px solid #161616;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:#cfd8e6;margin-bottom:4px">🛡️ PUTS</div><div class="muted" style="font-size:11px;line-height:1.55">Options de baisse : se protéger (couverture) ou parier sur une chute. Affichées sur les titres en signal « Éviter ».</div></div>
+  </div><div class="src">Repère pédagogique — analyse éducative, jamais un conseil. Aucun ordre passé (lecture seule).</div></div>
   <div class="foot">Contrats issus des <b>vraies chaînes yfinance</b> · grecs Black-Scholes maison · Option Quality /100 · ⛔ analyse only</div>
 </div>
 <script>
@@ -2973,11 +2987,13 @@ function row(c){const f=FIT[c.fit];return `<tr onclick="location.href='/titre/${
   <td class="muted">si $${c.tgt} <span class="${c.pot>=0?'up':'dn'}">${c.pot>=0?'+':''}${c.pot}%</span></td>
   <td><span class="fit" style="color:${f[1]};border:1px solid ${f[1]}66;background:${f[1]}14">${f[0]}</span></td></tr>`;}
 const HEAD=['Ticker','Échéance','Strike','Qualité','Δ','POP','Danger','OI','Vol','Spread','IV','Coût','Breakeven','Si cible','Verdict'];
-function section(col,title,list){return `<div class="panel"><div class="ph" style="background:linear-gradient(90deg,${col}26,transparent 70%)">${title}<span class="cnt">${list.length} contrats</span></div><table><thead><tr>${HEAD.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${list.map(row).join('')||'<tr><td colspan="15" class="muted" style="padding:16px">chaînes en calcul (~1-2 min)…</td></tr>'}</tbody></table></div>`;}
+function section(col,title,list){return `<div class="panel"><div class="ph" style="background:linear-gradient(90deg,${col}26,transparent 70%)">${title}<span class="cnt">${list.length} contrats</span></div><div class="swipe">← glisse le tableau pour voir toutes les colonnes →</div><div class="tscroll"><table><thead><tr>${HEAD.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${list.map(row).join('')||'<tr><td colspan="15" class="muted" style="padding:16px">chaînes en calcul (~1-2 min)…</td></tr>'}</tbody></table></div></div>`;}
 async function load(){
   let s={};try{s=await fetch('/scan').then(r=>r.json());}catch(e){}
   const board=(s.options_board||[]).filter(c=>c.type==='CALL');
   board.forEach(c=>c.fit=fitOf(c));
+  const puts=(s.options_board||[]).filter(c=>c.type==='PUT');
+  puts.forEach(c=>c.fit=fitOf(c));
   const m=s.market||{};const SE={pre:'🌅 avant-bourse',open:'🟢 séance',after:'🌙 après-bourse',closed:'🌑 fermé'};
   document.getElementById('hdate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase()+' · '+(SE[m.session]||'')+' '+(m.et||'');
   document.getElementById('hsrc').innerHTML='Source : <b>chaînes options réelles</b> · '+board.length+' contrats analysés';
@@ -2985,7 +3001,7 @@ async function load(){
   const best=[...board].sort((a,b)=>(b.quality||0)-(a.quality||0))[0];
   if(best){const f=FIT[best.fit];document.getElementById('feat').innerHTML=`<div style="min-width:140px"><div style="font-size:10px;color:#FFD27A;font-weight:800;letter-spacing:1px">⭐ MEILLEURE OPTION DU JOUR</div><div class="big">${best.sym}</div><div class="muted" style="font-size:12px">${(best.bucket||'').toUpperCase()} · ${eu(best.exp)} · strike $${best.strike}</div></div>
     <div style="text-align:center"><div style="font-size:34px;font-weight:900;color:${qc(best.quality)}">${best.quality}<span style="font-size:14px;color:#777">/100</span></div><div class="muted" style="font-size:10px">QUALITÉ</div></div>
-    <div style="flex:1;min-width:220px;font-size:12px;line-height:1.8"><div>POP <b style="color:${popc(best.pop)}">${best.pop}%</b> · danger <b style="color:${dgc(best.danger)}">${best.danger}</b> · delta <b>${best.delta}</b></div><div>coût <b>$${fmt(best.cost)}</b> · breakeven <b>$${best.be}</b> · si $${best.tgt} → <b class="${best.pot>=0?'up':'dn'}">${best.pot>=0?'+':''}${best.pot}%</b></div><div>OI ${fmt(best.oi)} · vol ${fmt(best.vol)} · IV ${best.iv}% · <span class="fit" style="color:${f[1]};border:1px solid ${f[1]}66">${f[0]}</span></div></div>`;}
+    <div style="flex:1;min-width:220px;font-size:12px;line-height:1.8"><div>POP <b style="color:${popc(best.pop)}">${best.pop}%</b> · danger <b style="color:${dgc(best.danger)}">${best.danger}</b> · delta <b>${best.delta}</b></div><div>coût <b>$${fmt(best.cost)}</b> · breakeven <b>$${best.be}</b> · si $${best.tgt} → <b class="${best.pot>=0?'up':'dn'}">${best.pot>=0?'+':''}${best.pot}%</b></div><div>OI ${fmt(best.oi)} · vol ${fmt(best.vol)} · IV ${best.iv}% · <span class="fit" style="color:${f[1]};border:1px solid ${f[1]}66">${f[0]}</span></div><div>proba cible <b style="color:${popc(best.p_tgt)}">${best.p_tgt}%</b> · move attendu <b>±${best.em_pct}%</b> · érosion théta <b style="color:${best.theta_burn>1.5?C.r:best.theta_burn>0.8?C.yl:C.g}">${best.theta_burn}%/j</b></div></div>`;}
   // stats
   const cnt=t=>board.filter(c=>c.fit===t).length;
   document.getElementById('stats').innerHTML=[['leaps','LEAPS Core',C.g],['swing','Swing',C.blue],['tact','Tactique',C.yl],['avoid','À éviter',C.r]].map(([k,l,c])=>`<div class="stat" style="border-color:${c}33"><div class="n" style="color:${c}">${cnt(k)}</div><div class="l">${l}</div></div>`).join('');
@@ -2994,7 +3010,8 @@ async function load(){
   document.getElementById('sections').innerHTML=
     section(C.g,'💎 LEAPS CORE · 6-18 mois · cœur de stratégie',byBucket('long'))
     +section(C.blue,'⚡ SWING · ~3 mois · mouvement rapide',byBucket('moyen'))
-    +section(C.yl,'🎲 TACTIQUE · 1-2 mois · théta violent, petite taille',byBucket('court'));
+    +section(C.yl,'🎲 TACTIQUE · 1-2 mois · théta violent, petite taille',byBucket('court'))
+    +(puts.length?section(C.r,'🛡️ PUTS · couverture / pari baissier',[...puts].sort((a,b)=>(b.quality||0)-(a.quality||0))):'');
 }
 load();setInterval(load,20000);
 </script></body></html>"""
