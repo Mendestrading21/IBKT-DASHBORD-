@@ -1898,7 +1898,11 @@ async function renderActionDuJour(d){
   const nc=nivCol(top.niveau),dc=decCol(top.tone);
   const lq=(window.__live||{})[top.symbol];
   const px=lq?lq.last:top.price, chg=(lq&&lq.change!=null)?lq.change:top.change;
-  el.innerHTML=`<div class="scard" onclick="go('${top.symbol}')" style="cursor:pointer;border:1.5px solid ${nc}66;background:linear-gradient(135deg,${nc}12,#0d0d0d)"><div style="padding:18px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+  const sd=(d.detail||{})[top.symbol]||{}, pl=sd.plan||{};
+  const lvT=(l,v,c)=>`<div style="flex:1 1 0;min-width:88px;background:#0c0c0c;border:1px solid #18181f;border-radius:10px;padding:9px 8px;text-align:center"><div style="font-size:8px;letter-spacing:.6px;text-transform:uppercase;color:#6b7689">${l}</div><div style="font-size:14px;font-weight:800;margin-top:2px;color:${c}">${v}</div></div>`;
+  const rr=(pl.entry&&pl.stop&&pl.tp2&&(pl.entry-pl.stop)>0)?((pl.tp2-pl.entry)/(pl.entry-pl.stop)).toFixed(1):null;
+  const lvls=pl.entry?`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 16px">${lvT('Entrée','$'+pl.entry,'#FFD27A')}${lvT('Stop','$'+pl.stop,'#EF4444')}${lvT('Cible 1','$'+pl.tp1,'#22C55E')}${lvT('Cible 2','$'+pl.tp2,'#22C55E')}${pl.resistance?lvT('Résist.','$'+pl.resistance,'#38BDF8'):''}${rr?lvT('Ratio R:R',rr+':1','#cfd8e6'):''}</div>`:'';
+  el.innerHTML=`<div class="scard" onclick="go('${top.symbol}')" style="cursor:pointer;border:1.5px solid ${nc}66;background:linear-gradient(135deg,${nc}12,#0d0d0d)"><div style="padding:18px 18px 12px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
     <div style="min-width:150px">
       <div style="font-size:30px;font-weight:800;letter-spacing:.5px">${top.symbol}</div>
       <div style="font-size:16px;font-weight:700;margin-top:2px">$${px} <span class="${chg>=0?'up':'dn'}" style="font-size:13px">${chg>=0?'+':''}${chg}%</span></div>
@@ -1912,7 +1916,7 @@ async function renderActionDuJour(d){
       <div class="muted" style="font-size:11px;margin-top:7px">Allocation max : <b style="color:${nc}">${top.alloc}</b></div>
     </div>
     <div id="dStarOpt" style="flex:1;min-width:225px;border-left:1px solid #ffffff10;padding-left:18px"><span class="muted" style="font-size:12px">chargement de l option…</span></div>
-  </div></div>`;
+  </div>${lvls}</div>`;
   if(window.__starSym!==top.symbol){
     window.__starSym=top.symbol;
     try{window.__starOpt=await(await fetch('/options/'+top.symbol)).json();}catch(e){window.__starOpt=null;}
