@@ -328,10 +328,35 @@ def backtest(data, lb=126, top_n=5, smin=58, eq0=100000.0):
     }
 
 
+def _download_universe(tickers, period='1y', chunk=50):
+    """Télécharge l'univers PAR LOTS (plus robuste/rapide qu'un seul gros appel
+    sur le plan gratuit). Renvoie un dict {ticker: DataFrame} ; un lot ou un
+    ticker en échec est simplement ignoré (jamais de plantage global)."""
+    frames = {}
+    for i in range(0, len(tickers), chunk):
+        part = tickers[i:i + chunk]
+        try:
+            dl = yf.download(part, period=period, interval='1d', progress=False,
+                             auto_adjust=True, group_by='ticker', threads=True)
+        except Exception:
+            continue
+        if dl is None or len(dl) == 0:
+            continue
+        for t in part:
+            try:
+                df = dl if len(part) == 1 else dl[t]
+                if df is not None and not df.dropna().empty:
+                    frames[t] = df
+            except Exception:
+                continue
+    return frames
+
+
 def scan():
     try:
-        data = yf.download(UNIVERSE + [BENCH, '^VIX', '^GSPC', '^IXIC', '^DJI', '^RUT'], period='1y', interval='1d',
-                           progress=False, auto_adjust=True, group_by='ticker', threads=True)
+        data = _download_universe(UNIVERSE + [BENCH, '^VIX', '^GSPC', '^IXIC', '^DJI', '^RUT'])
+        if BENCH not in data:
+            return
         bc = data[BENCH]['Close'].dropna()
         bench_ret = (float(bc.iloc[-1]) / float(bc.iloc[-63]) - 1) if len(bc) > 63 else 0.0
         rows, detail = [], {}
@@ -429,6 +454,7 @@ def scan():
                            'anomalies': anoms, 'sectors': secs, 'market_ctx': mctx, 'indices': indices,
                            'recommendations': recs,
                            'breadth': breadth, 'spy': spy, 'market': market_status(),
+                           'universe_n': len(UNIVERSE), 'scanned_n': len(rows),
                            'updated': datetime.now().strftime('%H:%M:%S'), 'error': None})
     except Exception as e:
         scan_state['error'] = f'{type(e).__name__}: {e}'
@@ -3044,7 +3070,7 @@ async function load(){
   const SE={pre:'🌅 AVANT-BOURSE',open:'🟢 SÉANCE OUVERTE',after:'🌙 APRÈS-BOURSE',closed:'🌑 FERMÉ'};
   document.getElementById('hdate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
   document.getElementById('hsess').textContent=(SE[m.session]||'—')+' · '+(m.et||'');
-  document.getElementById('hsrc').textContent=(q&&q.meta&&q.meta.rt)?'TEMPS RÉEL IBKR':'yfinance différé ~15min';
+  document.getElementById('hsrc').textContent=((q&&q.meta&&q.meta.rt)?'TEMPS RÉEL IBKR':'yfinance différé ~15min')+(s.scanned_n?' · '+s.scanned_n+'/'+s.universe_n+' titres analysés':'');
   const byChg=rows.filter(r=>typeof r.change==='number').sort((a,b)=>b.change-a.change);
   const out=[];
   // 0 — VUE MARCHÉ : bande indices + panneau macro (en-tête plateforme)
