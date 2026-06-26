@@ -3434,6 +3434,13 @@ function removeFav(s){setFavs(getFavs().filter(x=>x!==s));}
 function addInput(){var i=document.getElementById('addq');addFav(i.value);i.value='';}
 let DATA={detail:{},quotes:{},rt:false};
 function lvl(l,v,c){return `<div class="lvl"><div class="l">${l}</div><div class="v" style="color:${c||'#e6edf7'}">${v!=null?'$'+v:'—'}</div></div>`}
+function spark(arr){
+  if(!arr||arr.length<3)return '';
+  const a=arr.slice(-30),min=Math.min(...a),max=Math.max(...a),rng=(max-min)||1,W=300,H=46;
+  const pts=a.map((v,i)=>`${(i/(a.length-1)*W).toFixed(1)},${(H-2-((v-min)/rng)*(H-4)).toFixed(1)}`).join(' ');
+  const up=a[a.length-1]>=a[0],col=up?'#22C55E':'#EF4444';
+  return `<div style="margin-top:12px"><div class="muted" style="font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">Tendance 30 jours</div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:46px"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>`;
+}
 function card(sym){
   const d=(DATA.detail||{})[sym], x=(DATA.quotes||{})[sym];
   const price=x?x.last:(d?d.price:null), chg=(x&&x.change!=null)?x.change:(d?d.change:null);
@@ -3445,8 +3452,9 @@ function card(sym){
   const meta=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:11px"><span class="badge" style="color:${scol};border:1px solid ${scol}55">Score ${sc}/100</span>${d.grade?`<span class="badge muted" style="border:1px solid #2a2a33">Grade ${d.grade}</span>`:''}<span class="badge" style="color:${vcol(d.verdict)};background:${vcol(d.verdict)}1a">${vfr(d.verdict)}</span></div>`;
   const lvls=`<div class="lvls">${lvl('Entrée',p.entry,GOLD)}${lvl('Stop',p.stop,R)}${lvl('Résist.',p.resistance,BLUE)}${lvl('Cible 1',p.tp1,G)}${lvl('Cible 2',p.tp2,G)}${lvl('RSI',d.rsi!=null?d.rsi:null,'#cfd8e6').replace('$','')}</div>`;
   const dist=(toStop!=null&&toTp2!=null)?`<div class="muted" style="font-size:11px;margin-top:10px">🛡️ Stop à <b class="dn">-${toStop.toFixed(1)}%</b> · 🎯 Cible 2 à <b class="up">+${toTp2.toFixed(1)}%</b> du cours</div>`:'';
+  const sp=(d.series&&d.series.close)?spark(d.series.close):'';
   const acts=`<div class="acts"><a href="/titre/${sym}">📄 Fiche</a><a href="/options">💎 Options</a></div>`;
-  return `<div class="fav">${head}${meta}${lvls}${dist}${acts}</div>`;
+  return `<div class="fav">${head}${meta}${sp}${lvls}${dist}${acts}</div>`;
 }
 function render(){
   const favs=getFavs();
@@ -3682,6 +3690,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div><div class="nm" id="nm">chargement…</div><div class="tk" id="sym">…</div></div>
     <div><div class="px" id="px">—</div><div id="chg" class="muted" style="font-size:13px"></div></div>
     <div style="margin-left:auto;text-align:right" id="tags"></div>
+    <button id="favBtn" onclick="toggleFav()" style="margin-left:14px;background:#0e0e0e;border:1px solid #FFD27A55;color:#FFD27A;border-radius:10px;padding:9px 15px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">☆ Suivre</button>
   </div>
   <div id="ibkr"></div>
   <div class="grid2">
@@ -3754,6 +3763,10 @@ async function load(){
   // chart
   if(d.series&&d.series.close&&typeof Chart!=='undefined'){const cv=document.getElementById('cv');if(cv){const g=cv.getContext('2d').createLinearGradient(0,0,0,230);g.addColorStop(0,'rgba(245,166,35,.28)');g.addColorStop(1,'rgba(245,166,35,0)');new Chart(cv,{type:'line',data:{labels:d.series.dates,datasets:[{data:d.series.close,borderColor:'#F5A623',backgroundColor:g,fill:true,borderWidth:2,pointRadius:0,tension:.18},{data:d.series.ema20,borderColor:'#FFD27A',borderWidth:1.1,pointRadius:0,borderDash:[4,3]},{data:d.series.sma50,borderColor:'#6b7689',borderWidth:1,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b6b6b',maxTicksLimit:7,font:{size:9}},grid:{color:'#141414'}},y:{ticks:{color:'#6b6b6b',font:{size:9}},grid:{color:'#141414'}}}}});}}
 }
+function getFavs(){try{return JSON.parse(localStorage.getItem('myFavs')||'[]')}catch(e){return[]}}
+function toggleFav(){let a=getFavs();if(a.includes(SYM))a=a.filter(x=>x!==SYM);else a.unshift(SYM);localStorage.setItem('myFavs',JSON.stringify(a));updateFavBtn(true);}
+function updateFavBtn(flash){const b=document.getElementById('favBtn');if(!b)return;const on=getFavs().includes(SYM);b.innerHTML=on?'⭐ Dans Ma Page':'☆ Suivre';b.style.background=on?'rgba(255,210,122,.16)':'#0e0e0e';if(flash&&on){b.innerHTML='⭐ Ajouté à Ma Page ✓';setTimeout(()=>updateFavBtn(false),1400);}}
+updateFavBtn(false);
 load();setInterval(load,15000);
 </script></body></html>"""
 
