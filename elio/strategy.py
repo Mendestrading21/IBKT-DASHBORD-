@@ -149,6 +149,90 @@ def _legs(S, sig, plan, is_call):
     return [leg for leg in (_leg(S, sig, plan, is_call, h) for h in HORIZONS) if leg]
 
 
+# ── CONSTRUCTEUR DE PORTEFEUILLE (grosses sommes 50k/100k/200k) ───────────────
+# Profil utilisateur : 8-12 positions · mix étalé · ~87 % déployé (10-15 % cash)
+# CŒUR contrôlé (3-6-9 mois, delta haut, façon « action ») + SATELLITES offensifs
+# (1-2 mois OTM, levier) · risque ≤ 10 %/position.
+_CORE_HORIZONS = ['m3', 'm6', 'm9']
+_SAT_HORIZONS = ['m1', 'm2', 'm3']
+_DEPLOY = 0.87
+_CORE_SHARE = 0.66
+_MAX_POS_RISK = 0.10
+
+
+def _candidates(rows, detail, bias, limit):
+    out = []
+    for r in (rows or []):
+        sym = r.get('symbol')
+        d = detail.get(sym) if detail else None
+        if not d:
+            continue
+        S = d.get('price')
+        if not S or S <= 0:
+            continue
+        sig = _iv_proxy(d.get('atr_pct'))
+        bullish = (d.get('verdict') or '').upper() not in _BEAR
+        primary = 'PUT' if bias == 'dangerous' else ('CALL' if bullish else 'PUT')
+        legs = {l['key']: l for l in _legs(S, sig, (d.get('plan') or {}), primary == 'CALL')}
+        if not legs:
+            continue
+        out.append({'sym': sym, 'S': round(S, 2), 'grade': d.get('grade'),
+                    'score': d.get('score'), 'dir': primary, 'legs': legs})
+        if len(out) >= limit:
+            break
+    return out
+
+
+def build_portfolio(rows, detail, market=None, capital=100000, n_core=6, n_sat=4):
+    """Alloue un capital (50k/100k/200k…) en portefeuille d'options selon le profil."""
+    bias = _bias(market)
+    cand = _candidates(rows, detail, bias, n_core + n_sat)
+    deploy = capital * _DEPLOY
+    core_budget, sat_budget = deploy * _CORE_SHARE, deploy * (1 - _CORE_SHARE)
+    positions = []
+
+    def add(group, budget, horizons, role):
+        if not group:
+            return
+        per = budget / len(group)
+        for idx, c in enumerate(group):
+            leg = c['legs'].get(horizons[idx % len(horizons)]) or next(iter(c['legs'].values()), None)
+            if not leg:
+                continue
+            unit = leg['premium'] * 100
+            if unit <= 0:
+                continue
+            contracts = int(per // unit)
+            if contracts < 1 and unit <= capital * 0.12:
+                contracts = 1
+            while contracts > 1 and contracts * unit > capital * _MAX_POS_RISK:
+                contracts -= 1
+            if contracts < 1:
+                continue
+            cost = round(contracts * unit)
+            sc = leg['scenarios']
+            positions.append({
+                'sym': c['sym'], 'role': role, 'dir': c['dir'], 'grade': c['grade'],
+                'horizon': leg['label'], 'dte': leg['dte'], 'strike': leg['strike'],
+                'premium': leg['premium'], 'delta': leg['delta'], 'contracts': contracts,
+                'cost': cost, 'maxloss': cost,
+                'gain_prob': round(contracts * 100 * (sc['prob']['val'] - leg['premium'])),
+                'gain_exc': round(contracts * 100 * (sc['except']['val'] - leg['premium'])),
+                'prob_pct': sc['prob']['pct'], 'exc_pct': sc['except']['pct']})
+
+    add(cand[:n_core], core_budget, _CORE_HORIZONS, 'CŒUR')
+    add(cand[n_core:n_core + n_sat], sat_budget, _SAT_HORIZONS, 'SATELLITE')
+    deployed = sum(p['cost'] for p in positions)
+    gp = sum(p['gain_prob'] for p in positions)
+    ge = sum(p['gain_exc'] for p in positions)
+    return {'capital': capital, 'deployed': deployed, 'cash': round(capital - deployed),
+            'positions': positions, 'n': len(positions), 'maxloss': deployed,
+            'gain_prob': gp, 'gain_exc': ge,
+            'gain_prob_pct': round(gp / capital * 100, 1) if capital else 0,
+            'gain_exc_pct': round(ge / capital * 100, 1) if capital else 0,
+            'regime': bias}
+
+
 def build(rows, detail, market=None, top_n=6):
     """Stratégie pour les meilleures convictions. Call ET Put, pondérés régime."""
     bias = _bias(market)
