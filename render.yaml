@@ -14,6 +14,8 @@ services:
     envVars:
       - key: NO_IBKR          # désactive la connexion IBKR (pas de TWS sur le cloud)
         value: "1"
+      - key: DEMO             # mode VITRINE : chiffres synthétiques réalistes (FICTIFS),
+        value: "1"            # sans réseau ni surcharge mémoire. Marqué « 🎭 DÉMO » dans l'UI.
       - key: START_ON_IMPORT  # démarre les threads de scan/news/etc. à l'import (gunicorn)
         value: "1"
       - key: PYTHON_VERSION
