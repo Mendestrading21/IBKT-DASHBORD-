@@ -1194,6 +1194,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -1231,7 +1235,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -1240,6 +1244,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -1702,6 +1713,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -1739,7 +1754,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -1748,6 +1763,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -2551,6 +2573,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -2588,7 +2614,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -2597,6 +2623,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -2728,6 +2761,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -2765,7 +2802,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -2774,6 +2811,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -2826,6 +2870,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -2863,7 +2911,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -2872,6 +2920,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -2935,6 +2990,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -2972,7 +3031,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -2981,6 +3040,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -3085,6 +3151,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -3122,7 +3192,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -3131,6 +3201,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -3433,6 +3510,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -3470,7 +3551,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -3479,6 +3560,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -3723,6 +3811,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -3760,7 +3852,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -3769,6 +3861,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -4033,6 +4132,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -4070,7 +4173,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -4079,6 +4182,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -4232,6 +4342,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -4269,7 +4383,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -4278,6 +4392,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
@@ -4448,6 +4569,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .gnav-search input{background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:9px;padding:7px 11px;font-size:13px;width:210px;max-width:46vw}
 .gnav-search button{background:rgba(245,180,91,.12);border:1px solid #F5B45B55;color:#F5B45B;border-radius:9px;padding:7px 13px;font-weight:800;cursor:pointer}
 .gnav-fresh{font-size:10px;font-weight:800;padding:5px 10px;border-radius:8px;white-space:nowrap;border:1px solid transparent;letter-spacing:.3px}
+.gnav-tws{font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;background:rgba(34,197,94,.12);border:1px solid #22C55E66;color:#22C55E}
+.gnav-tws:hover{background:rgba(34,197,94,.2)}
+#gnav-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);max-width:90vw;background:#16171c;border:1px solid #FF8C32;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:600;color:#e8edf5;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;pointer-events:none;transition:.3s;line-height:1.4}
+#gnav-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .back{display:none!important}
 @media(max-width:640px){.gnav-in{padding:6px 10px;gap:8px}.gnav-links{order:2;overflow-x:auto;flex-wrap:nowrap}#gnav a{font-size:12px;padding:6px 9px}.gnav-search{order:1;width:100%}.gnav-search input{flex:1;max-width:none;width:auto}}
 /* === systeme de design premium (toutes pages) === */
@@ -4485,7 +4610,7 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
-nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
+nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
 var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
@@ -4494,6 +4619,13 @@ mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.index
 document.body.appendChild(mn);}
 window.gnavGo=function(e){e.preventDefault();var v=(document.getElementById('gnavq').value||'').trim().toUpperCase();if(v)location.href='/titre/'+encodeURIComponent(v);return false;};
 window.gnavFresh=function(){fetch('/healthz').then(function(r){return r.json()}).then(function(h){var el=document.getElementById('gnav-fresh');if(!el)return;var s,c;if(h.scan_age==null){s=h.scan_error?'⚠️ ERREUR DATA':'⏳ CHARGEMENT…';c=h.scan_error?'#EF4444':'#38BDF8';}else if(h.scan_age>420){s='⚠️ ANCIEN';c='#EF4444';}else if(h.ibkr_enabled){s='🟢 LIVE IBKR';c='#22C55E';}else{s='🟡 DIFFÉRÉ';c='#FFB23F';}el.textContent=s;el.style.color=c;el.style.borderColor=c+'66';el.style.background=c+'1a';el.style.display='';}).catch(function(){});};
+window.gnavToast=function(msg,col){var t=document.getElementById('gnav-toast');if(!t){t=document.createElement('div');t.id='gnav-toast';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=col||'#FF8C32';t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(function(){t.classList.remove('show');},7000);};
+window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(btn){btn.textContent='⏳ …';}gnavToast('Connexion à TWS en cours…','#38BDF8');
+  fetch('/ibkr').then(function(r){return r.json()}).then(function(k){if(btn)btn.textContent='🔌 TWS';
+    if(k&&k.connected){var acc=k.account?(' · compte '+k.account):'';gnavToast('✅ Connecté à TWS — TEMPS RÉEL'+acc,'#22C55E');if(btn){btn.style.color='#22C55E';}}
+    else if(k&&k.error&&/cloud|désactiv/i.test(k.error)){gnavToast('⚠️ Tu es sur la version cloud (Render). Le direct TWS marche seulement en lançant le dashboard SUR TON PC (double-clic lancer_dashboard.bat) avec TWS ouvert.','#FFB23F');}
+    else{gnavToast('🔌 TWS non détecté. Ouvre TWS / IB Gateway + active l\'API en lecture seule (Read-Only), puis réessaie.','#EF4444');}
+  }).catch(function(){if(btn)btn.textContent='🔌 TWS';gnavToast('Connexion impossible — réessaie dans un instant.','#EF4444');});};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
