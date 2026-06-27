@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.1-command-center'   # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.2-audit'            # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -469,6 +469,7 @@ def _demo_one(sym, n=260):
         drift = (rng.random() - 0.42) * 0.0016                 # léger biais haussier
         vol = 0.008 + rng.random() * 0.03
         close = base * np.exp(np.cumsum(rng.normal(drift, vol, n)))
+        close = close * (base / close[-1])     # ancre le DERNIER cours sur le prix réaliste
     close = close.astype('float32')
     hi = (close * (1 + rng.random(n).astype('float32') * 0.012)).astype('float32')
     lo = (close * (1 - rng.random(n).astype('float32') * 0.012)).astype('float32')
