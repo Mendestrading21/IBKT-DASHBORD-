@@ -14,7 +14,7 @@ import os
 import math
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -76,6 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
+BUILD = 'v3.1-stooq-fallback'   # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 REFRESH_SEC = 120   # ~170 titres scannés (core + big caps + trend) → intervalle large pour le plan gratuit
@@ -333,10 +334,79 @@ def backtest(data, lb=126, top_n=5, smin=58, eq0=100000.0):
     }
 
 
+# ─── SOURCE DE SECOURS : STOOQ (EOD gratuit, NON bloqué sur les IP cloud/Render) ──
+# Yahoo (yfinance) rate-limite les serveurs de datacenter → yf.download revient vide
+# sur Render. Stooq sert de filet : données de clôture quotidiennes, mises en cache
+# 6 h (EOD = 1 maj/jour, donc aucun spam de l'endpoint gratuit). Lecture seule.
+_STOOQ_CACHE = {'ts': 0.0, 'frames': {}}
+_STOOQ_TTL = 6 * 3600
+_STOOQ_IDX = {'^GSPC': '^spx', '^DJI': '^dji', '^IXIC': '^ndq', '^RUT': '^rut', '^VIX': '^vix'}
+
+
+def _stooq_symbol(t):
+    if t in _STOOQ_IDX:
+        return _STOOQ_IDX[t]
+    if t.startswith('^'):
+        return t[1:].lower()
+    return t.lower() + '.us'          # ex: AAPL→aapl.us, BRK-B→brk-b.us
+
+
+def _stooq_one(t):
+    """Télécharge l'historique quotidien d'UN ticker depuis Stooq (CSV)."""
+    import urllib.request
+    from io import StringIO
+    d2 = datetime.now()
+    d1 = d2 - timedelta(days=1100)    # ~3 ans → assez pour MM200
+    url = (f'https://stooq.com/q/d/l/?s={_stooq_symbol(t)}'
+           f'&d1={d1:%Y%m%d}&d2={d2:%Y%m%d}&i=d')
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            txt = r.read().decode('utf-8', 'ignore')
+        if not txt or 'Date' not in txt[:60]:   # 'No data' / page HTML → échec
+            return t, None
+        df = pd.read_csv(StringIO(txt))
+        if df.empty or 'Close' not in df.columns or 'Date' not in df.columns:
+            return t, None
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        df = df.dropna(subset=['Date']).set_index('Date').sort_index()
+        keep = [c for c in ('Open', 'High', 'Low', 'Close', 'Volume') if c in df.columns]
+        df = df[keep].dropna(subset=['Close'])
+        return (t, df) if not df.empty else (t, None)
+    except Exception:
+        return t, None
+
+
+def _stooq_download(tickers):
+    """Filet de secours mutualisé + caché 6 h. Renvoie {ticker: DataFrame}."""
+    now = time.time()
+    cache = _STOOQ_CACHE['frames']
+    if cache and (now - _STOOQ_CACHE['ts'] < _STOOQ_TTL):
+        return {t: cache[t] for t in tickers if t in cache}
+    out = {}
+    try:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=6) as ex:   # doux pour l'endpoint gratuit
+            for t, df in ex.map(_stooq_one, tickers):
+                if df is not None and len(df) >= 60:
+                    out[t] = df
+    except Exception:
+        for t in tickers:
+            _t, df = _stooq_one(t)
+            if df is not None and len(df) >= 60:
+                out[_t] = df
+    if out:
+        _STOOQ_CACHE['frames'] = out
+        _STOOQ_CACHE['ts'] = now
+    return out
+
+
 def _download_universe(tickers, period='1y', chunk=50):
     """Télécharge l'univers PAR LOTS (plus robuste/rapide qu'un seul gros appel
     sur le plan gratuit). Renvoie un dict {ticker: DataFrame} ; un lot ou un
-    ticker en échec est simplement ignoré (jamais de plantage global)."""
+    ticker en échec est simplement ignoré (jamais de plantage global).
+    Si yfinance échoue (ex: Yahoo bloque l'IP du serveur cloud), bascule
+    automatiquement sur Stooq pour les tickers manquants."""
     frames = {}
     for i in range(0, len(tickers), chunk):
         part = tickers[i:i + chunk]
@@ -344,7 +414,7 @@ def _download_universe(tickers, period='1y', chunk=50):
             dl = yf.download(part, period=period, interval='1d', progress=False,
                              auto_adjust=True, group_by='ticker', threads=True)
         except Exception:
-            continue
+            dl = None
         if dl is None or len(dl) == 0:
             continue
         for t in part:
@@ -354,6 +424,17 @@ def _download_universe(tickers, period='1y', chunk=50):
                     frames[t] = df
             except Exception:
                 continue
+    # FILET DE SECOURS : tout ce que Yahoo n'a pas donné → Stooq (cloud-friendly)
+    yahoo_n = len(frames)
+    missing = [t for t in tickers if t not in frames]
+    if missing:
+        try:
+            frames.update(_stooq_download(missing))
+        except Exception:
+            pass
+    stooq_n = len(frames) - yahoo_n
+    scan_state['source'] = ('yfinance' if stooq_n == 0 else
+                            'stooq' if yahoo_n == 0 else 'yfinance+stooq')
     return frames
 
 
@@ -361,6 +442,7 @@ def scan():
     try:
         data = _download_universe(UNIVERSE + [BENCH, '^VIX', '^GSPC', '^IXIC', '^DJI', '^RUT'])
         if BENCH not in data:
+            scan_state['error'] = 'aucune donnee marche (yfinance + stooq indisponibles)'
             return
         bc = data[BENCH]['Close'].dropna()
         bench_ret = (float(bc.iloc[-1]) / float(bc.iloc[-63]) - 1) if len(bc) > 63 else 0.0
@@ -802,6 +884,8 @@ def healthz():
     du scan sans bloquer. Aucune donnée sensible, lecture seule."""
     return jsonify({
         'status': 'ok',
+        'build': BUILD,
+        'data_source': scan_state.get('source'),
         'ibkr_enabled': IBKR_ENABLED,
         'universe': len(UNIVERSE),
         'scanned': scan_state.get('scanned_n'),
