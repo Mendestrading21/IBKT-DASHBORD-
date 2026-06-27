@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from flask import Flask, jsonify, redirect
+from flask import Flask, jsonify, redirect, request
 
 try:
     from dotenv import load_dotenv
@@ -715,6 +715,84 @@ def options_pack(sym):
 @app.route('/scan')
 def scan_ep():
     return jsonify({**scan_state, 'ai_on': ai.available()})
+
+
+def _market_score(mc):
+    """Score marché /100 (régime + risk-on/off + breadth + VIX). Même logique que l'UI."""
+    if not mc:
+        return None
+    br = mc.get('breadth') or {}
+    reg, ro, vb = mc.get('spy_regime'), mc.get('roro'), mc.get('vix_band')
+    s = (35 if reg == 'TREND' else 18 if reg == 'NEUTRAL' else 6 if reg == 'CHOP' else 14)
+    s += (25 if ro == 'RISK-ON' else 2 if ro == 'RISK-OFF' else 12)
+    a50 = br.get('above50')
+    s += round((a50 if a50 is not None else 50) / 100 * 25)
+    s += (15 if vb == 'calme' else 2 if vb == 'stress' else 8)
+    return max(0, min(100, round(s)))
+
+
+def _scan_age():
+    return round(time.time() - scan_state['scan_ts']) if scan_state.get('scan_ts') else None
+
+
+@app.route('/api/market/summary')
+def api_market_summary():
+    """Résumé marché pour widgets (lecture seule)."""
+    mc = scan_state.get('market_ctx') or {}
+    sc = _market_score(mc)
+    verdict = 'FAVORABLE' if (sc or 0) >= 65 else 'NEUTRE' if (sc or 0) >= 40 else 'DANGEREUX'
+    return jsonify({
+        'score': sc, 'verdict': verdict,
+        'regime': mc.get('spy_regime'), 'roro': mc.get('roro'), 'roro_gap': mc.get('roro_gap'),
+        'vix': mc.get('vix'), 'vix_band': mc.get('vix_band'), 'vix_chg': mc.get('vix_chg'),
+        'breadth': mc.get('breadth'), 'market_verdict': mc.get('verdict'),
+        'indices': scan_state.get('indices'), 'spy': scan_state.get('spy'),
+        'best_sector': (scan_state.get('sectors') or [None])[0],
+        'scanned': scan_state.get('scanned_n'), 'universe': len(UNIVERSE),
+        'scan_age': _scan_age(), 'market': scan_state.get('market'),
+        'source': 'ibkr' if IBKR_ENABLED else 'cloud',
+    })
+
+
+@app.route('/api/cockpit')
+def api_cockpit():
+    """Widgets du cockpit : action du jour + top opportunités."""
+    recs = scan_state.get('recommendations') or []
+    cand = sorted([r for r in recs if r.get('tone') in ('buy', 'pullback')],
+                  key=lambda r: ((r.get('timing') == 'BUY_NOW'), r.get('score40', 0)), reverse=True)
+    top = cand[0] if cand else (recs[0] if recs else None)
+    return jsonify({'action': top, 'opportunities': recs[:15], 'updated': scan_state.get('updated')})
+
+
+@app.route('/api/watchlist')
+def api_watchlist():
+    return jsonify({'rows': scan_state.get('rows') or [], 'sectors': scan_state.get('sectors') or [],
+                    'scanned': scan_state.get('scanned_n'), 'universe': len(UNIVERSE),
+                    'updated': scan_state.get('updated')})
+
+
+@app.route('/api/options')
+def api_options():
+    return jsonify({'board': scan_state.get('options_board') or [], 'updated': scan_state.get('updated')})
+
+
+@app.route('/api/ticker/<sym>')
+def api_ticker(sym):
+    sym = sym.upper()
+    return jsonify({'symbol': sym, 'in_universe': sym in UNIVERSE,
+                    'detail': (scan_state.get('detail') or {}).get(sym), 'pack': options_pack(sym)})
+
+
+@app.route('/api/search')
+def api_search():
+    q = (request.args.get('q') or '').upper().strip()
+    res = [{'ticker': s} for s in UNIVERSE if q in s][:20] if q else []
+    return jsonify(res)
+
+
+@app.route('/api/weekly')
+def api_weekly():
+    return jsonify(weekly_state.get('data') or {})
 
 
 @app.route('/healthz')
