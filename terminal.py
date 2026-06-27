@@ -4413,6 +4413,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <button id="favBtn" onclick="toggleFav()" style="margin-left:14px;background:#0e0e0e;border:1px solid #F5B45B55;color:#F5B45B;border-radius:10px;padding:9px 15px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">☆ Suivre</button>
   </div>
   <div id="ibkr"></div>
+  <div class="card" style="margin-bottom:14px"><div class="ct">📊 GRAPHIQUE TRADINGVIEW · <span id="tvsym"></span></div><div id="tvchart" style="height:430px"></div><div class="muted" style="font-size:10px;margin-top:6px">Graphique fourni par TradingView · analyse éducative.</div></div>
   <div class="grid2">
     <div id="left"></div>
     <div id="right"></div>
@@ -4422,6 +4423,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script>
 const C={g:'#22C55E',r:'#EF4444',gold:'#F5B45B',blue:'#38BDF8',vio:'#A78BFA',cy:'#34D399',yl:'#FFB23F',mut:'#6b7689'};
 const SYM=decodeURIComponent((location.pathname.split('/').filter(Boolean).pop()||'')).toUpperCase();
+(function(){var t=document.getElementById('tvsym');if(t)t.textContent=SYM;
+  var s=document.createElement('script');s.src='https://s3.tradingview.com/tv.js';s.async=true;
+  s.onload=function(){try{new TradingView.widget({container_id:'tvchart',symbol:SYM,interval:'D',timezone:'Europe/Zurich',theme:'dark',style:'1',locale:'fr',autosize:true,hide_top_toolbar:false,hide_side_toolbar:true,allow_symbol_change:true,studies:['STD;EMA'],backgroundColor:'#16171c',gridColor:'#1a1a22'});}catch(e){var el=document.getElementById('tvchart');if(el)el.innerHTML='<div class="muted" style="padding:30px;text-align:center">Graphique TradingView indisponible.</div>';}};
+  s.onerror=function(){var el=document.getElementById('tvchart');if(el)el.innerHTML='<div class="muted" style="padding:30px;text-align:center">Graphique TradingView indisponible (hors-ligne).</div>';};
+  document.head.appendChild(s);})();
 function niv(n){return n==='S+'?C.g:n==='S'?C.cy:n==='A'?C.gold:n==='B'?C.yl:C.r}
 function tim(s){return s==='BUY_NOW'?'✅ achat propre':s==='BUY_PULLBACK'?'⏳ sur repli':s==='WATCH_BREAKOUT'?'👀 sur cassure':s==='TOO_LATE'?'🛑 trop étendu':'éviter'}
 function eu(s){return s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(2,4):''}
