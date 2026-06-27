@@ -4252,9 +4252,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div><div class="htitle">ANALYSE ENTREPRISE</div><div class="hsub" id="hsub">…</div></div>
     <div class="hmeta"><div>Cours <b>en direct</b> + fondamentaux</div><div id="hsrc">…</div><div style="font-size:10px;color:#5b6678;margin-top:3px">Analyse éducative — pas un conseil · ⛔ aucun ordre</div></div>
   </div>
+  <div class="kpiband" id="entKpi"></div>
   <div class="bar" id="bar"></div>
   <div class="panel"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-  <div class="foot">Trie en cliquant les colonnes · clic ligne → fiche complète sur le cockpit · <b>57 leaders US</b></div>
+  <div class="foot">Trie en cliquant les colonnes · clic ligne → fiche complète · <b id="entFoot">titres US</b> · fondamentaux yfinance (P/E, marge, croissance) ; ROIC/PEG/EV-EBITDA non disponibles</div>
 </div>
 <script>
 const C={g:'#22C55E',r:'#EF4444',gold:'#F5B45B',blue:'#38BDF8',mut:'#6b7689'};
@@ -4307,6 +4308,22 @@ async function load(){
   const m=s.market||{},SE={pre:'🌅 avant-bourse',open:'🟢 séance',after:'🌙 après-bourse',closed:'🌑 fermé'};
   document.getElementById('hsub').textContent=DATA.length+' sociétés · '+(SE[m.session]||'')+' '+(m.et||'');
   document.getElementById('hsrc').innerHTML=(q&&q.meta&&q.meta.rt)?'Cours <b>TEMPS RÉEL IBKR</b> + fondamentaux yfinance':'Cours yfinance différé + fondamentaux';
+  // ── BANDEAU KPI FONDAMENTAL ──
+  const ek=document.getElementById('entKpi');
+  if(ek){const kc=(ic,t,v,c,sub)=>`<div class="kc"><div class="kt">${ic} ${t}</div><div class="kv" style="color:${c||'#e8edf5'}">${v}</div>${sub?`<div class="ks">${sub}</div>`:''}</div>`;
+    const nQual=DATA.filter(r=>(r.score||0)>=72).length;
+    const nGrow=DATA.filter(r=>r.growth!=null&&r.growth>=0.15).length;
+    const nVal=DATA.filter(r=>r.valTone==='good').length;
+    const nMarg=DATA.filter(r=>r.margin!=null&&r.margin>=0.2).length;
+    const nMom=DATA.filter(r=>(r.rs||0)>=70).length;
+    const nUp=DATA.filter(r=>(r.change||0)>0).length;
+    const nRisk=DATA.filter(r=>(r.growth!=null&&r.growth<0)||(r.margin!=null&&r.margin<0.05)).length;
+    ek.innerHTML=kc('🏢','Univers',DATA.length,'#e8edf5','sociétés')
+      +kc('⭐','Qualité forte',nQual,'#FF8C32','score ≥ 72')+kc('🚀','Croissance',nGrow,'#22C55E','CA ≥ +15%')
+      +kc('💰','Valo attractive',nVal,'#34D399','décoté vs secteur')+kc('📊','Marge élevée',nMarg,'#38BDF8','≥ 20%')
+      +kc('⚡','Momentum',nMom,'#F5B45B','RS ≥ 70')+kc('📈','En hausse',nUp,'#22C55E','aujourd hui')
+      +kc('⚠️','Risque fonda',nRisk,'#EF4444','marge/croiss. faible');}
+  var ef=document.getElementById('entFoot');if(ef)ef.textContent=(s.universe_n||DATA.length)+' titres US';
   updateBar();render();
 }
 load();setInterval(load,12000);
