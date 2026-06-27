@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy
+from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee
 
 DAILY_PREV_PATH = os.path.join(os.path.dirname(__file__), 'daily_prev.json')  # baseline diff jour/jour
 WEEKLY_PATH = os.path.join(os.path.dirname(__file__), 'weekly_snapshot.json')  # sélection hebdo FIGÉE
@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.7-portefeuille'     # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v3.8-comite'           # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -90,7 +90,7 @@ REFRESH_SEC = 120   # ~170 titres scannés (core + big caps + trend) → interva
 app = Flask(__name__)
 scan_state = {'rows': [], 'detail': {}, 'portfolio': None, 'options_board': [], 'daily': None,
               'anomalies': [], 'sectors': [], 'market_ctx': None, 'fundamentals': None, 'indices': [],
-              'recommendations': [], 'strategy': None, 'updated': None, 'error': None}
+              'recommendations': [], 'strategy': None, 'committee': None, 'updated': None, 'error': None}
 
 
 # ─── helpers numériques ───────────────────────────────────────────────────
@@ -603,9 +603,14 @@ def scan():
             strat = strategy.build(rows, detail, market=mctx, top_n=6)
         except Exception:
             strat = scan_state.get('strategy')
+        # COMITÉ D'INVESTISSEMENT (4 portes + thèse/plan/invalidation/conviction)
+        try:
+            comite = committee.evaluate(rows, detail, market=mctx, top_n=12)
+        except Exception:
+            comite = scan_state.get('committee')
         scan_state.update({'rows': rows, 'detail': detail, 'portfolio': pf, 'daily': daily_brief,
                            'anomalies': anoms, 'sectors': secs, 'market_ctx': mctx, 'indices': indices,
-                           'recommendations': recs, 'strategy': strat,
+                           'recommendations': recs, 'strategy': strat, 'committee': comite,
                            'breadth': breadth, 'spy': spy, 'market': market_status(),
                            'universe_n': len(syms_scan), 'scanned_n': len(rows),
                            'scan_ts': time.time(),
@@ -945,6 +950,12 @@ def api_weekly():
 def api_strategie():
     """Stratégie options personnalisée (1/2/3/6/9/12 mois). Lecture seule, analyse only."""
     return jsonify(scan_state.get('strategy') or {})
+
+
+@app.route('/api/comite')
+def api_comite():
+    """Comité d'investissement : décisions documentées (4 portes). Analyse only."""
+    return jsonify(scan_state.get('committee') or {})
 
 
 @app.route('/api/portefeuille')
@@ -1972,6 +1983,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     </div>
     <div id="dPartic" style="margin-top:15px;padding-top:14px;border-top:1px solid #ffffff0d"></div>
   </div>
+  <div id="comite"></div>
   <div class="stitle">⭐ L'ACTION DU JOUR <span class="muted" style="font-weight:400;letter-spacing:0;font-size:11px">· le meilleur trade du jour, sélectionné par le moteur IBKR</span></div>
   <div id="dStar" style="margin-bottom:18px"></div>
   <div class="khero" id="dHero2"></div>
@@ -2156,8 +2168,37 @@ function renderCmd(d){
       <div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700"><span style="color:#EF4444">RISK-OFF</span><div style="flex:1;height:8px;border-radius:5px;background:linear-gradient(90deg,#EF4444,#FFB23F,#22C55E);position:relative"><div style="position:absolute;top:-2px;left:calc(${rpos}% - 6px);width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #0b0b0d;box-shadow:0 0 7px rgba(0,0,0,.7)"></div></div><span style="color:#22C55E">RISK-ON</span></div>
     </div></div>`;
 }
+function buildComite(cm){
+  var el=document.getElementById('comite'); if(!el)return;
+  if(!cm||!cm.decisions||!cm.decisions.length){return;}
+  var pr=cm.profile||{},cc=cm.counts||{};
+  var gate=function(ok){return ok?'<span style="color:#22C55E">✅</span>':'<span style="color:#5b6678">⬜</span>';};
+  var h='<div class="scard" style="margin:4px 0 16px;border-color:#A78BFA55">'
+    +'<div class="shead" style="background:linear-gradient(90deg,#A78BFA26,transparent 70%)"><span class="ico">🏛️</span> COMITÉ D\'INVESTISSEMENT <span class="muted" style="font-weight:400;font-size:11px;margin-left:8px">· '+(pr.name||'')+'</span></div>'
+    +'<div style="padding:12px 16px 4px"><div style="font-size:13.5px;font-weight:800;margin-bottom:8px">'+(cm.verdict_global||'')+'</div>'
+    +'<div class="muted" style="font-size:11px;line-height:1.65;margin-bottom:6px">🎯 '+(pr.gates||'')+'<br>📌 '+(pr.alloc||'')+'<br>⚠️ '+(pr.discipline||'')+'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'
+    +'<span class="pill" style="color:#22C55E;border-color:#22C55E55">ACHETER '+(cc.ACHETER||0)+'</span>'
+    +'<span class="pill" style="color:#34D399;border-color:#34D39955">RENFORCER '+(cc.RENFORCER||0)+'</span>'
+    +'<span class="pill" style="color:#FFB23F;border-color:#FFB23F55">ATTENDRE '+(cc.ATTENDRE||0)+'</span>'
+    +'<span class="pill" style="color:#EF4444;border-color:#EF444455">ÉVITER '+(cc['ÉVITER']||0)+'</span></div></div>'
+    +'<div style="padding:4px 12px 14px;display:flex;flex-direction:column;gap:9px">';
+  cm.decisions.forEach(function(x){var p=x.plan||{},g=x.gates||{};
+    h+='<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;background:#0c0c0c;border:1px solid '+x.color+'44;border-left:3px solid '+x.color+';border-radius:11px;padding:11px 13px">'
+      +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="sym" style="font-size:15px">'+x.symbol+'</span>'
+      +(x.theme?'<span style="font-size:9px;color:#A78BFA;font-weight:700">★ thème</span>':'')+'<span class="muted">$'+x.price+'</span>'
+      +'<span style="font-weight:900;color:'+x.color+';margin-left:auto;font-size:13px">'+x.verdict+'</span>'
+      +'<span style="font-size:11px;color:#8794ab">conv. '+x.conviction+'/100</span></div>'
+      +'<div style="font-size:11px;margin:7px 0;display:flex;gap:10px;flex-wrap:wrap">'+gate(g.company)+' Entreprise '+gate(g.catalyst)+' Catalyseur '+gate(g.timing)+' Timing '+gate(g.rr)+' R:R '+(p.rr||0)+':1</div>'
+      +'<div style="font-size:11.5px;color:#cfd8e6;line-height:1.5"><b style="color:'+x.color+'">'+x.note+'</b></div>'
+      +'<div style="font-size:11px;color:#8794ab;margin-top:5px;line-height:1.55">📊 <b>Thèse :</b> '+x.thesis+'<br>🎯 <b>Plan :</b> entrée $'+p.entry+' · stop <span class="dn">$'+p.stop+'</span> · cible <span class="up">$'+p.tp2+'</span> · R:R '+(p.rr||0)+':1<br>🛑 <b>Invalidation :</b> '+x.invalidation+'</div></div>';
+  });
+  h+='</div><div class="src" style="padding:6px 16px 12px">Chaque décision passe les 4 portes du profil · triée ACHETER → ATTENDRE → ÉVITER · le comité freine l\'impatience (ATTENDRE si R:R &lt; 2:1 ou pas de catalyseur). Analyse éducative — jamais un ordre.</div></div>';
+  el.innerHTML=h;
+}
 function renderDaily(d){
   try{renderKPI(d);renderCmd(d);}catch(e){}
+  try{buildComite(d.committee);}catch(e){}
   const dy=d.daily||{}, sec=dy.sections||{}, DET=d.detail||{};
   const spk=s=>spark((DET[s]||{}).series&&DET[s].series.close);
   // VERDICT DU JOUR (contexte marché)
