@@ -59,6 +59,16 @@ def _evaluate_one(sym, d):
 
     gates = {'company': g_company, 'catalyst': g_catalyst, 'timing': g_timing, 'rr': g_rr}
 
+    # ── TIMING D'ENTRÉE : prix sous lequel le R:R redevient ≥ 2:1 (anti-impatience)
+    # R:R = (résistance − entrée)/(entrée − stop) ≥ 2  ⇒  entrée ≤ (résistance + 2·stop)/3
+    res, stop, price = plan.get('resistance'), plan.get('stop'), d.get('price')
+    entry_zone, in_zone = None, False
+    if res and stop and price and res > stop:
+        ez = (res + 2 * stop) / 3.0
+        if ez < price:                      # zone de repli réaliste sous le cours
+            entry_zone = round(ez, 2)
+            in_zone = price <= entry_zone
+
     # ── VERDICT (discipline avant tout) ──────────────────────────────────────
     if not g_company:
         verdict, color = 'ÉVITER', '#EF4444'
@@ -72,7 +82,13 @@ def _evaluate_one(sym, d):
         note = f"Timing défavorable : {why}. On patiente."
     elif not g_rr:
         verdict, color = 'ATTENDRE', '#FFB23F'
-        note = f"R:R {rr}:1 < 2:1 — avantage insuffisant. Attendre un repli vers ${plan.get('entry')} pour un meilleur rapport."
+        if entry_zone and in_zone:
+            verdict, color = 'ACHETER', '#22C55E'
+            note = f"✅ DANS LA ZONE D'ACHAT (≤ ${entry_zone}) — le repli est là, R:R redevient ≥ 2:1. Fenêtre d'entrée ouverte."
+        elif entry_zone:
+            note = f"R:R {rr}:1 < 2:1 — avantage insuffisant. 🎯 Zone d'achat : sous ${entry_zone} (R:R ≥ 2:1). On guette le repli, on ne court pas après."
+        else:
+            note = f"R:R {rr}:1 < 2:1 — avantage insuffisant. Attendre un meilleur point d'entrée."
     elif not g_catalyst:
         verdict, color = 'ATTENDRE', '#FFB23F'
         note = "Pas de catalyseur clair (cassure / momentum / earnings). Surveiller, ne pas forcer."
@@ -104,6 +120,7 @@ def _evaluate_one(sym, d):
         'plan': {'entry': plan.get('entry'), 'stop': plan.get('stop'),
                  'tp2': plan.get('tp2'), 'tp3': plan.get('tp3'), 'rr': rr},
         'invalidation': invalidation,
+        'entry_zone': entry_zone, 'in_zone': in_zone,
         'price': d.get('price'), 'change': d.get('change'),
     }
 

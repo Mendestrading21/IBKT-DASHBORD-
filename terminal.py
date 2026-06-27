@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.0-vertex'           # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.1-command-center'   # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -956,6 +956,71 @@ def api_strategie():
 def api_comite():
     """Comité d'investissement : décisions documentées (4 portes). Analyse only."""
     return jsonify(scan_state.get('committee') or {})
+
+
+@app.route('/api/command')
+def api_command():
+    """VERTEX COMMAND CENTER : consolide régime, top actions/options, alertes,
+    décision du jour, exposition. Machine de décision — lecture seule, aucun ordre."""
+    mc = scan_state.get('market_ctx') or {}
+    cm = scan_state.get('committee') or {}
+    st = scan_state.get('strategy') or {}
+    detail = scan_state.get('detail') or {}
+    score = _market_score(mc)
+    reg, roro = mc.get('spy_regime'), mc.get('roro')
+    # régime final
+    if roro == 'RISK-OFF':
+        regime = {'label': '🔴 RISK-OFF', 'color': '#EF4444'}
+    elif roro == 'RISK-ON' and reg != 'CHOP':
+        regime = {'label': '🟢 RISK-ON', 'color': '#22C55E'}
+    else:
+        regime = {'label': '🟡 NEUTRE', 'color': '#FFB23F'}
+    regime.update({'score': score, 'spy_regime': reg, 'roro': roro})
+    # top 5 actions (comité actionnable)
+    decisions = cm.get('decisions') or []
+    top_stocks = [{'symbol': d['symbol'], 'verdict': d['verdict'], 'color': d['color'],
+                   'conviction': d['conviction'], 'price': d['price'],
+                   'rr': (d.get('plan') or {}).get('rr'), 'note': d['note']}
+                  for d in decisions if d['verdict'] in ('ACHETER', 'RENFORCER')][:5]
+    # top 5 options (meilleure échéance 6 mois)
+    top_options = []
+    for p in (st.get('picks') or [])[:5]:
+        d = p.get('primary', 'CALL')
+        legs = (p.get('put') if d == 'PUT' else p.get('call')) or []
+        leg = next((l for l in legs if l.get('key') == 'm6'), legs[0] if legs else None)
+        if leg:
+            sc = leg.get('scenarios') or {}
+            top_options.append({'symbol': p['symbol'], 'dir': d, 'label': leg['label'],
+                                'strike': leg['strike'], 'premium': leg['premium'],
+                                'prob': (sc.get('prob') or {}).get('pct'),
+                                'except': (sc.get('except') or {}).get('pct')})
+    # alertes rouges (risk manager, niveau marché)
+    alerts = []
+    if roro == 'RISK-OFF':
+        alerts.append(['🔴', 'RISK-OFF', "Marché risk-off — réduire l'exposition, pas de nouveau pari agressif."])
+    if reg == 'CHOP':
+        alerts.append(['🟠', 'RANGE', 'Marché sans tendance (chop) — les cassures échouent, patience.'])
+    vix = mc.get('vix')
+    if vix and vix > 22:
+        alerts.append(['🟠', 'VOLATILITÉ', f'VIX {round(vix)} élevé — options chères, dimensionner petit.'])
+    overext = sum(1 for dd in detail.values() if (dd.get('ext_atr') or 0) >= 3)
+    if overext >= 5:
+        alerts.append(['🟠', 'EUPHORIE', f'{overext} titres très étendus — ne pas chasser, attendre les replis.'])
+    # décision du jour
+    n_act = len(top_stocks)
+    if roro == 'RISK-OFF' or reg == 'CHOP':
+        decision = {'action': 'RÉDUIRE / DÉFENSIF', 'color': '#EF4444',
+                    'msg': 'Préserver le capital : cash + couvertures. On n\'attaque pas.'}
+    elif n_act >= 2 and (score or 0) >= 55:
+        decision = {'action': 'ATTAQUER', 'color': '#22C55E',
+                    'msg': f'{n_act} setups validés en marché porteur — déployer avec discipline (R:R ≥ 2:1).'}
+    else:
+        decision = {'action': 'ATTENDRE / SÉLECTIF', 'color': '#FFB23F',
+                    'msg': 'Peu d\'avantage statistique — n\'acheter que l\'exceptionnel, garder du cash.'}
+    return jsonify({'regime': regime, 'portfolio_score': score, 'decision': decision,
+                    'top_stocks': top_stocks, 'top_options': top_options, 'alerts': alerts,
+                    'counts': cm.get('counts') or {},
+                    'exposure': {'actions': '70-90%', 'options': '10-20%', 'etf': 'tampon / cash'}})
 
 
 @app.route('/api/portefeuille')
@@ -1969,6 +2034,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <span class="pill" id="dDate"><span class="pdot"></span>MAJ —</span>
     </div>
   </div>
+  <div id="vertexcmd"></div>
   <div class="idxstrip" id="dIndices"></div>
   <div class="kpiband" id="dKpi"><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div></div>
   <div id="dDetail" style="display:none;margin-bottom:14px"></div>
@@ -2168,6 +2234,28 @@ function renderCmd(d){
       <div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700"><span style="color:#EF4444">RISK-OFF</span><div style="flex:1;height:8px;border-radius:5px;background:linear-gradient(90deg,#EF4444,#FFB23F,#22C55E);position:relative"><div style="position:absolute;top:-2px;left:calc(${rpos}% - 6px);width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #0b0b0d;box-shadow:0 0 7px rgba(0,0,0,.7)"></div></div><span style="color:#22C55E">RISK-ON</span></div>
     </div></div>`;
 }
+function buildVertexCmd(){
+  fetch('/api/command').then(function(r){return r.json()}).then(function(k){
+    var el=document.getElementById('vertexcmd'); if(!el||!k||!k.decision)return;
+    var dec=k.decision,rg=k.regime||{},sc=k.portfolio_score,cc=k.counts||{};
+    var tile=function(l,v,c){return '<div style="flex:1;min-width:84px;background:#0c0c0e;border:1px solid #1c1c24;border-radius:12px;padding:10px 11px;text-align:center"><div style="font-size:9px;color:#8794ab;text-transform:uppercase;letter-spacing:.5px">'+l+'</div><div style="font-size:18px;font-weight:900;color:'+(c||'#fff')+';margin-top:2px">'+v+'</div></div>';};
+    var h='<div style="border:1.5px solid #FF8C3266;border-radius:16px;background:linear-gradient(160deg,#1a1206,#0a0a0c 60%);box-shadow:0 0 40px rgba(255,140,50,.10);overflow:hidden;margin:6px 0 14px">'
+      +'<div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid #ffffff12"><span style="font-size:20px">🔺</span><span style="font-size:16px;font-weight:900;letter-spacing:1px;background:linear-gradient(180deg,#FFB23F,#FF8C32);-webkit-background-clip:text;-webkit-text-fill-color:transparent">VERTEX COMMAND CENTER</span><span style="margin-left:auto;font-weight:800;color:'+rg.color+';border:1px solid '+rg.color+'66;border-radius:8px;padding:3px 10px;font-size:12px">'+(rg.label||'')+'</span></div>'
+      +'<div style="padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid #ffffff0d"><div><div style="font-size:10px;letter-spacing:2px;color:#8794ab;font-weight:700">DÉCISION DU JOUR</div><div style="font-size:24px;font-weight:900;color:'+dec.color+';line-height:1.1;margin-top:2px">'+dec.action+'</div></div><div style="flex:1;min-width:170px;font-size:12px;color:#cfd8e6;line-height:1.45">'+dec.msg+'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px">'
+      +tile('Score marché',(sc!=null?sc:'—')+'<span style="font-size:10px;color:#5b6678">/100</span>',sc>=60?'#22C55E':sc>=45?'#FFB23F':'#EF4444')
+      +tile('Acheter',cc.ACHETER||0,'#22C55E')+tile('Renforcer',cc.RENFORCER||0,'#34D399')
+      +tile('Attendre',cc.ATTENDRE||0,'#FFB23F')+tile('Éviter',cc['ÉVITER']||0,'#EF4444')+'</div>';
+    if(k.alerts&&k.alerts.length){h+='<div style="padding:0 16px 10px;display:flex;flex-direction:column;gap:6px">'+k.alerts.map(function(a){return '<div style="background:rgba(239,68,68,.08);border:1px solid #EF444444;border-radius:9px;padding:8px 11px;font-size:11.5px"><b style="color:#F87171">'+a[0]+' '+a[1]+'</b> — '+a[2]+'</div>';}).join('')+'</div>';}
+    var ts=k.top_stocks||[],to=k.top_options||[];
+    h+='<div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 16px 14px">'
+      +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#FF8C32;margin-bottom:6px">📈 TOP ACTIONS</div>'+(ts.length?ts.map(function(x){return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="color:'+x.color+';font-weight:800;font-size:11px">'+x.verdict+'</span><span class="muted" style="font-size:10px">R:R '+(x.rr||0)+':1</span><span style="margin-left:auto;font-size:10px;color:#8794ab">conv '+x.conviction+'</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">Aucun achat validé — patience.</div>')+'</div>'
+      +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#A78BFA;margin-bottom:6px">💎 TOP OPTIONS CALL</div>'+(to.length?to.map(function(x){return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="font-size:10px;color:#8794ab">'+x.label+' $'+x.strike+'</span><span style="margin-left:auto;font-size:11px" class="up">+'+x.prob+'%</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">—</div>')+'</div></div>';
+    var ex=k.exposure||{};
+    h+='<div class="src" style="padding:6px 16px 12px">📌 Cible d\'exposition : Actions '+ex.actions+' · Options '+ex.options+' · ETF '+ex.etf+' · ⛔ aucun ordre — décisions, scores & plans uniquement.</div></div>';
+    el.innerHTML=h;
+  }).catch(function(){});
+}
 function buildComite(cm){
   var el=document.getElementById('comite'); if(!el)return;
   if(!cm||!cm.decisions||!cm.decisions.length){return;}
@@ -2198,6 +2286,7 @@ function buildComite(cm){
 }
 function renderDaily(d){
   try{renderKPI(d);renderCmd(d);}catch(e){}
+  try{buildVertexCmd();}catch(e){}
   try{buildComite(d.committee);}catch(e){}
   const dy=d.daily||{}, sec=dy.sections||{}, DET=d.detail||{};
   const spk=s=>spark((DET[s]||{}).series&&DET[s].series.close);
