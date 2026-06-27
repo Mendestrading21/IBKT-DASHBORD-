@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.8-comite'           # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.0-vertex'           # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -1168,8 +1168,8 @@ def manifest_ep():
     """Manifeste PWA → permet « Ajouter à l'écran d'accueil » sur iPhone/Android
     et l'ouverture en plein écran comme une vraie app."""
     return jsonify({
-        'name': 'Trading Desk — Cockpit IBKR',
-        'short_name': 'Trading Desk',
+        'name': 'Vertex — Cockpit IBKR',
+        'short_name': 'Vertex',
         'description': "Cockpit d'analyse trading (analyse only).",
         'start_url': '/',
         'scope': '/',
@@ -1269,7 +1269,7 @@ def weekly_regen_ep():
 
 
 PAGE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRACK TERMINAL</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRACK TERMINAL</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#e8e8e8;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px}
@@ -1414,14 +1414,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -1437,7 +1437,7 @@ window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
-<div class="top"><span class="brand">◣ TRACK TERMINAL</span>
+<div class="top"><span class="brand">🔺 VERTEX</span>
 <a href="/daily" style="margin-left:16px;color:#F5B45B;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;border:1px solid #F5B45B55;padding:5px 12px;border-radius:8px">📅 DAILY</a>
 <a href="/sectors" style="margin-left:8px;color:#FFB23F;text-decoration:none;font-weight:700;font-size:12px;letter-spacing:1px;border:1px solid #FFB23F55;padding:5px 12px;border-radius:8px">🔥 SECTEURS</a>
 <div class="bubbles" id="bubbles"></div></div>
@@ -1757,7 +1757,7 @@ setInterval(refresh,15000);refresh();
 
 
 PAGE_DAILY = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · DAILY WATCHLIST</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · DAILY WATCHLIST</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#cfd8e6;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -1933,14 +1933,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -1956,11 +1956,11 @@ window.gnavConnectTWS=function(){var btn=document.querySelector('.gnav-tws');if(
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();})();
 </script></head><body>
-<div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">◣ TRADING DESK</span><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
+<div class="topbar"><span class="back" style="font-weight:800;letter-spacing:1px">🔺 VERTEX</span><span id="dLive" style="font-size:11px;margin-left:14px;color:#8794ab">· connexion…</span><span class="tick" id="dTick"></span></div>
 <div class="daily">
   <div class="dhead">
     <div>
-      <div class="ttl">◣ TRADING DESK <span class="v">WATCHLIST</span></div>
+      <div class="ttl">🔺 VERTEX <span class="v">WATCHLIST</span></div>
       <div class="sub">LEADERS US · S&P / NASDAQ / DOW · SCORÉS · CLASSÉS — TON BRIEF QUOTIDIEN</div>
     </div>
     <div class="meta">
@@ -2060,7 +2060,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
   <div class="dfoot">
     <div class="slogan">TRADE SMART · TRADE STRONG</div>
-    <div class="dis">TRADING DESK · DONNÉES yfinance DIFFÉRÉ ~15MIN · ANALYSE ONLY — AUCUN ORDRE, AUCUNE EXÉCUTION · NOT FINANCIAL ADVICE</div>
+    <div class="dis">VERTEX · DONNÉES yfinance DIFFÉRÉ ~15MIN · ANALYSE ONLY — AUCUN ORDRE, AUCUNE EXÉCUTION · NOT FINANCIAL ADVICE</div>
   </div>
 </div>
 <script>
@@ -2718,7 +2718,7 @@ NAV = ('<div class="nav"><a href="/" class="navb">📈 Terminal</a>'
        '<span class="navtick" id="navTick"></span></div>')
 
 PAGE_SECTORS = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · SECTEURS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · SECTEURS</title>
 <style>
 *{box-sizing:border-box}html{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 body{margin:0;background:#070707;color:#eaf0fa;font:13px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
@@ -2823,14 +2823,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -2852,7 +2852,7 @@ __NAV__
     <div class="sub">57 LEADERS US · 9 SECTEURS · CLASSÉS PAR FORCE · ▲/▼ vs hier · clic = fiche · ANALYSE ONLY · yfinance différé ~15min</div></div>
   <div class="heat" id="heat"></div>
   <div id="secdetail"></div>
-  <div class="foot">TRADING DESK · les secteurs sont calculés depuis les 57 leaders scannés · aucune donnée inventée</div>
+  <div class="foot">VERTEX · les secteurs sont calculés depuis les 57 leaders scannés · aucune donnée inventée</div>
 </div>
 <script>
 function q(i){return document.getElementById(i)}
@@ -2946,7 +2946,7 @@ function go(s){location.href='/analyse?sym='+s}
 """
 
 PAGE_NEWS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · News</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · News</title>
 <style>__CSS__</style><style id="m-fix">
 html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){
@@ -3011,14 +3011,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -3055,7 +3055,7 @@ setInterval(nf,20000);nf();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_OPTIONS = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Options</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · Options</title>
 <style>__CSS__</style><style id="m-fix">
 html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){
@@ -3120,14 +3120,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -3175,7 +3175,7 @@ setInterval(ro,15000);ro();
 </script></body></html>""".replace('__CSS__', _BASE_CSS).replace('__JS__', _BASE_JS)
 
 PAGE_CALENDAR = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Calendrier</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · Calendrier</title>
 <style>__CSS__</style><style id="m-fix">
 html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){
@@ -3240,14 +3240,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -3336,7 +3336,7 @@ _WEEKLY_CSS = _BASE_CSS + """
 """
 
 PAGE_WEEKLY = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>TRADING DESK · Semaine</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest"><title>VERTEX · Semaine</title>
 <style>__CSS__</style><style id="m-fix">
 html,body{overflow-x:hidden;max-width:100%}
 @media(max-width:640px){
@@ -3401,14 +3401,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -3619,7 +3619,7 @@ _RAIL_ITEMS = [('/', '🏠', 'Dashboard'), ('/analyse', '📈', 'Analyse titre')
 def _rail(active):
     btns = ''.join('<a href="%s" class="rb %s">%s <span>%s</span></a>' % (h, 'on' if h == active else '', i, l)
                    for h, i, l in _RAIL_ITEMS)
-    return _RAIL_CSS + '<div class="rail"><div class="rlogo">◣ <b>TRADING DESK</b></div>' + btns + '<div class="rfoot"><span class="d"></span>live · maj 15s</div></div>'
+    return _RAIL_CSS + '<div class="rail"><div class="rlogo">🔺 <b>VERTEX</b></div>' + btns + '<div class="rfoot"><span class="d"></span>live · maj 15s</div></div>'
 
 
 PAGE = PAGE.replace('<body>', '<body>' + _rail('/analyse'), 1)
@@ -3659,8 +3659,8 @@ PAGE_WEEKLY = PAGE_WEEKLY.replace('<body>', '<body>' + _rail('/semaine'), 1)
 
 # ─── DAILY WATCHLIST (page poster auto, style intelligence quotidienne) ──────
 PAGE_WATCHLIST = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
-<title>Daily Watchlist · Trading Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Daily Watchlist · Vertex</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 50% -10%,#161616,#070707 60%);color:#e8edf5;font-family:'Segoe UI',system-ui,sans-serif;padding:22px;font-variant-numeric:tabular-nums}
@@ -3760,14 +3760,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -3792,7 +3792,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <div class="hsub" id="hdate">…</div>
     </div>
     <div class="hmeta">
-      <div>TRADING DESK · <b id="hsess">…</b></div>
+      <div>VERTEX · <b id="hsess">…</b></div>
       <div>Données <b id="hsrc">…</b></div>
       <div class="disc">Analyse éducative — pas un conseil financier.</div>
     </div>
@@ -3956,8 +3956,8 @@ def watchlist_page():
 
 # ─── OPTIONS DESK (page complète : toutes les options à acheter / analyser) ──
 PAGE_OPTIONS_DESK = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
-<title>Options Desk · Trading Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Options Desk · Vertex</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 50% -10%,#161616,#070707 60%);color:#e8edf5;font-family:'Segoe UI',system-ui,sans-serif;padding:20px;font-variant-numeric:tabular-nums}
@@ -4061,14 +4061,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -4359,10 +4359,129 @@ def options_desk_alias():
     return PAGE_OPTIONS_DESK
 
 
+# ─── PAGE STRATÉGIE (dédiée) : bouton Actions/Options · 5 meilleures idées · live ──
+_STRAT_BODY = r"""<a class="back" href="/">← cockpit</a>
+<style>
+.sgseg{flex:1;background:#0e0e0e;border:1px solid #1c1c24;color:#aab4c4;font-size:14px;font-weight:800;padding:13px;border-radius:12px;cursor:pointer;letter-spacing:.3px}
+.sgseg.on{background:linear-gradient(135deg,rgba(255,140,50,.16),#0c0c0c);border-color:#FF8C32;color:#FF8C32;box-shadow:0 0 22px rgba(255,140,50,.12)}
+.stitle2{font-size:14px;font-weight:900;letter-spacing:.6px;color:#fff;margin:20px 0 10px;display:flex;align-items:center;gap:9px}
+.idea{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-left:3px solid #FF8C32;border-radius:13px;padding:13px 15px;cursor:pointer}
+.idea .rk{font-size:22px;font-weight:900;color:#FF8C32;min-width:30px}
+.lt{display:flex;align-items:center;gap:10px;padding:9px 13px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:#0d0e12;cursor:pointer;margin-bottom:6px}
+.lt:hover{border-color:#FF8C3255}
+</style>
+<div class="wrap">
+  <div class="htop"><span style="font-size:36px">🎯</span>
+    <div><div class="htitle">STRATÉGIE</div><div class="hsub">5 meilleures idées · actions socle + options CALL · profil offensif de croissance</div></div>
+    <div class="hmeta"><div id="sgRegime">…</div><div style="font-size:10px;color:#5b6678;margin-top:3px">Analyse éducative — jamais un ordre · lecture seule</div></div>
+  </div>
+  <div style="display:flex;gap:8px;margin:14px 0">
+    <button id="tgA" class="sgseg on" onclick="sgMode('actions')">📈 STRATÉGIE ACTIONS</button>
+    <button id="tgO" class="sgseg" onclick="sgMode('options')">💎 STRATÉGIE OPTIONS</button>
+  </div>
+  <div class="stitle2">🏆 LES 5 MEILLEURES IDÉES <span class="muted" style="font-weight:400;font-size:11px">· filtrées par le comité · le pourquoi en une ligne</span></div>
+  <div id="bestideas"><div class="muted" style="padding:14px">analyse en cours…</div></div>
+  <div id="stratbody"></div>
+  <div class="stitle2" id="ltTitle">📡 MES TITRES EN DIRECT</div>
+  <div id="livetitles"></div>
+  <div class="foot">Profil : offensif de croissance · actions de qualité + CALL longues comme levier · R:R ≥ 2:1 · discipline anti-impatience. Tout en <b>analyse éducative</b> — aucun ordre passé.</div>
+</div>
+<script>
+const C={g:'#22C55E',r:'#EF4444',o:'#FF8C32',gold:'#F5B45B',blue:'#38BDF8',vio:'#A78BFA',cy:'#34D399',yl:'#FFB23F'};
+function fmt(n){return n==null?'—':(Math.abs(n)>=1e6?(n/1e6).toFixed(1)+'M':Math.abs(n)>=1e3?(n/1e3).toFixed(1)+'k':n)}
+function vcol(v){return v==='ACHETER'?C.g:v==='RENFORCER'?C.cy:v==='ATTENDRE'?C.yl:C.r}
+window.__mode='actions';window.__cm=null;window.__st=null;window.__scan=null;
+window.sgMode=function(m){window.__mode=m;document.getElementById('tgA').className='sgseg'+(m==='actions'?' on':'');document.getElementById('tgO').className='sgseg'+(m==='options'?' on':'');renderBody();renderLive();};
+function renderBest(){
+  var cm=window.__cm; var el=document.getElementById('bestideas'); if(!el)return;
+  var ds=(cm&&cm.decisions)||[]; if(!ds.length){el.innerHTML='<div class="muted" style="padding:14px">en attente du scan…</div>';return;}
+  var act=ds.filter(function(x){return x.verdict==='ACHETER'||x.verdict==='RENFORCER';});
+  var list=(act.length>=5?act:act.concat(ds.filter(function(x){return x.verdict==='ATTENDRE';}))).slice(0,5);
+  if(!list.length)list=ds.slice(0,5);
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:9px">'+list.map(function(x,i){var p=x.plan||{};var vc=vcol(x.verdict);
+    return '<div class="idea" style="border-left-color:'+vc+'" onclick="location.href=\'/titre/'+x.symbol+'\'"><div style="display:flex;align-items:center;gap:12px">'
+      +'<span class="rk">#'+(i+1)+'</span><div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="sym" style="font-size:15px">'+x.symbol+'</span>'
+      +(x.theme?'<span style="font-size:9px;color:'+C.vio+';font-weight:700">★ thème</span>':'')
+      +'<span class="muted">$'+x.price+'</span><span style="font-weight:900;color:'+vc+'">'+x.verdict+'</span>'
+      +'<span class="muted" style="font-size:11px">conv. '+x.conviction+'/100 · R:R '+(p.rr||0)+':1</span></div>'
+      +'<div style="font-size:11.5px;color:#cfd8e6;margin-top:4px;line-height:1.45">'+x.note+'</div>'
+      +'<div style="font-size:10.5px;color:#8794ab;margin-top:3px">📊 '+x.thesis+'</div></div></div></div>';
+  }).join('')+'</div>';
+}
+function renderBody(){
+  var el=document.getElementById('stratbody'); if(!el)return;
+  document.getElementById('ltTitle').innerHTML=window.__mode==='actions'?'📡 MES TITRES EN DIRECT <span class="muted" style="font-weight:400;font-size:11px">· classés par score</span>':'📡 MES TITRES EN DIRECT <span class="muted" style="font-weight:400;font-size:11px">· clic = options du titre</span>';
+  if(window.__mode==='actions')renderActions(el); else renderOptions(el);
+}
+function renderActions(el){
+  var cm=window.__cm; var ds=(cm&&cm.decisions)||[];
+  var act=ds.filter(function(x){return x.verdict==='ACHETER'||x.verdict==='RENFORCER';});
+  var wait=ds.filter(function(x){return x.verdict==='ATTENDRE';});
+  function card(x){var p=x.plan||{};var vc=vcol(x.verdict);
+    return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid '+vc+'44;border-radius:13px;padding:13px 15px;margin-bottom:9px">'
+      +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="sym" style="font-size:15px">'+x.symbol+'</span><span class="muted">$'+x.price+'</span>'
+      +'<span style="font-weight:900;color:'+vc+';margin-left:auto">'+x.verdict+'</span><span class="muted" style="font-size:11px">conv. '+x.conviction+'</span></div>'
+      +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px"><span>Entrée <b>$'+p.entry+'</b></span><span>Stop <b class="dn">$'+p.stop+'</b></span><span>Cible <b class="up">$'+p.tp2+'</b></span><span>R:R <b>'+(p.rr||0)+':1</b></span></div>'
+      +'<div style="font-size:11px;color:#cfd8e6;line-height:1.45"><b style="color:'+vc+'">'+x.note+'</b></div>'
+      +'<div style="font-size:10.5px;color:#8794ab;margin-top:3px">📊 '+x.thesis+' · 🛑 '+x.invalidation+'</div></div>';
+  }
+  var h='';
+  if(act.length){h+='<div class="stitle2" style="color:'+C.g+'">✅ À ACHETER / RENFORCER ('+act.length+')</div>'+act.map(card).join('');}
+  if(wait.length){h+='<div class="stitle2" style="color:'+C.yl+'">⏳ EN SURVEILLANCE — attendre un meilleur point ('+wait.length+')</div>'+wait.map(card).join('');}
+  if(!h)h='<div class="muted" style="padding:14px">aucune idée actions pour le moment.</div>';
+  el.innerHTML=h;
+}
+function renderOptions(el){
+  var st=window.__st; var picks=(st&&st.picks)||[];
+  if(!picks.length){el.innerHTML='<div class="muted" style="padding:14px">stratégie options en calcul…</div>';return;}
+  var h='<div class="muted" style="font-size:11px;margin:2px 0 10px">Achat de CALL/PUT directionnel · échéances 1→12 mois · gain valorisé en cours de route (spéculation). <a href="/options" style="color:'+C.gold+'">→ détail complet & portefeuille</a></div>';
+  picks.forEach(function(p){var dir=p.primary||'CALL';var legs=(dir==='PUT'?p.put:p.call)||[];var dc=dir==='CALL'?C.g:C.r;
+    h+='<div style="background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:11px 14px;margin-bottom:9px">'
+      +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px"><span class="sym" style="font-size:15px">'+p.symbol+'</span>'
+      +'<span style="color:'+dc+';font-weight:800;border:1px solid '+dc+';border-radius:6px;padding:0 7px;font-size:11px">'+(dir==='CALL'?'📈 CALL':'🛡️ PUT')+'</span>'
+      +'<span class="muted">$'+p.price+' · IV '+p.iv+'%</span></div>'
+      +'<div class="tscroll"><table><thead><tr><th>Échéance</th><th>Strike</th><th>Prime</th><th>🎯 Probable</th><th>Except.</th></tr></thead><tbody>'
+      +legs.map(function(l){var pr=(l.scenarios||{}).prob||{},ex=(l.scenarios||{}).except||{};return '<tr onclick="location.href=\'/titre/'+p.symbol+'\'"><td class="sym">'+l.label+'</td><td>$'+l.strike+'</td><td>$'+l.premium+'</td><td class="'+(pr.pct>=0?'up':'dn')+'" style="font-weight:700">'+(pr.pct>=0?'+':'')+pr.pct+'%</td><td class="up">+'+ex.pct+'%</td></tr>';}).join('')
+      +'</tbody></table></div></div>';
+  });
+  el.innerHTML=h;
+}
+function renderLive(){
+  var el=document.getElementById('livetitles'); if(!el)return;
+  var s=window.__scan||{};var rows=(s.rows||[]).slice(0,20);
+  if(!rows.length){el.innerHTML='<div class="muted" style="padding:14px">en attente du scan…</div>';return;}
+  el.innerHTML=rows.map(function(r){var vc=r.verdict==='BUY'?C.g:r.verdict==='SELL'?C.r:C.yl;var ch=r.change>=0;
+    var href=window.__mode==='options'?'/titre/'+r.symbol:'/titre/'+r.symbol;
+    return '<div class="lt" onclick="location.href=\''+href+'\'"><span class="sym" style="min-width:62px">'+r.symbol+'</span>'
+      +'<span style="min-width:78px">$'+r.price+'</span><span class="'+(ch?'up':'dn')+'" style="min-width:66px">'+(ch?'+':'')+r.change+'%</span>'
+      +'<span class="muted" style="min-width:70px">score '+r.score+'</span>'
+      +'<span style="margin-left:auto;color:'+vc+';font-weight:800;font-size:11px">'+(r.verdict||'')+'</span></div>';
+  }).join('');
+}
+function loadStrat(){
+  Promise.all([fetch('/api/comite').then(function(r){return r.json()}).catch(function(){return{}}),
+               fetch('/api/strategie').then(function(r){return r.json()}).catch(function(){return{}}),
+               fetch('/scan').then(function(r){return r.json()}).catch(function(){return{}})])
+    .then(function(a){window.__cm=a[0];window.__st=a[1];window.__scan=a[2];
+      var rg=(a[0]&&a[0].decisions&&a[0].verdict_global)||'';var el=document.getElementById('sgRegime');if(el)el.innerHTML=rg||'profil offensif de croissance';
+      renderBest();renderBody();renderLive();});
+}
+loadStrat();setInterval(loadStrat,30000);
+</script></body></html>"""
+PAGE_STRATEGIE = PAGE_OPTIONS_DESK.split('</head><body>', 1)[0] + '</head><body>' + _STRAT_BODY
+
+
+@app.route('/strategie')
+@app.route('/strategy')
+def strategie_page():
+    return PAGE_STRATEGIE
+
+
 # ─── MA PAGE (espace perso : favoris + niveaux clés, sauvegardé sur l'appareil) ──
 PAGE_ME = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
-<title>Ma Page · Trading Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Ma Page · Vertex</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 50% -10%,#15130a,#070707 60%);color:#e8edf5;font-family:'Segoe UI',system-ui,sans-serif;padding:20px;font-variant-numeric:tabular-nums}
@@ -4465,14 +4584,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -4585,8 +4704,8 @@ def my_page():
 
 # ─── ANALYSE ENTREPRISE (toutes les infos live + fondamentaux des sociétés) ──
 PAGE_ENTREPRISES = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
-<title>Analyse Entreprise · Trading Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Analyse Entreprise · Vertex</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:radial-gradient(1200px 600px at 50% -10%,#161616,#070707 60%);color:#e8edf5;font-family:'Segoe UI',system-ui,sans-serif;padding:20px;font-variant-numeric:tabular-nums}
@@ -4675,14 +4794,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -4811,8 +4930,8 @@ def entreprises_page():
 
 # ─── FICHE ENTREPRISE COMPLÈTE (page dédiée par titre) ──────────────────────
 PAGE_TITRE = r"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trading Desk"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
-<title>Fiche · Trading Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Vertex"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0b0e14"><link rel="apple-touch-icon" href="/static/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
+<title>Fiche · Vertex</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -4902,14 +5021,14 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 }
 </style>
 <script>
-(function(){var L=[['/','🔱 Cockpit'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
+(function(){var L=[['/','🔱 Cockpit'],['/strategie','🎯 Stratégie'],['/ma-page','⭐ Ma Page'],['/watchlist','📋 Watchlist'],['/entreprises','🏢 Entreprises'],['/options','💎 Options']];
 function build(){if(document.getElementById('gnav'))return;var p=location.pathname;
 var links=L.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'>'+x[1]+'</a>';}).join('');
 var nav=document.createElement('nav');nav.id='gnav';
 nav.innerHTML='<div class="gnav-in"><div class="gnav-links">'+links+'</div><span id="gnav-fresh" class="gnav-fresh" style="display:none"></span><button type="button" class="gnav-tws" onclick="gnavConnectTWS()">🔌 TWS</button><form class="gnav-search" onsubmit="return gnavGo(event)"><input id="gnavq" placeholder="Rechercher un titre… (ex: NVDA)" autocomplete="off"><button type="submit">→</button></form></div>';
 document.body.insertBefore(nav,document.body.firstChild);
 gnavFresh();setInterval(gnavFresh,30000);
-var M=[['/','🏠','Cockpit'],['/watchlist','📡','Scan'],['/ma-page','⭐','Ma Page'],['/options','💎','Options'],['/entreprises','🏢','Titres']];
+var M=[['/','🏠','Cockpit'],['/strategie','🎯','Stratégie'],['/watchlist','📡','Scan'],['/options','💎','Options'],['/ma-page','⭐','Ma Page']];
 var mn=document.createElement('nav');mn.id='mnav';
 mn.innerHTML=M.map(function(x){var a=(x[0]==='/'?(p==='/'||p==='/daily'):p.indexOf(x[0])===0);return '<a href="'+x[0]+'"'+(a?' class="act"':'')+'><span class="mi">'+x[1]+'</span>'+x[2]+'</a>';}).join('');
 document.body.appendChild(mn);}
@@ -5051,7 +5170,7 @@ def _start_app():
     _start_workers()
     port = int(os.environ.get('PORT', 5002))          # le cloud (Render…) impose le port via $PORT
     # host 0.0.0.0 = accessible réseau local (iPhone) ET cloud
-    print(f'TRACK TERMINAL -> http://localhost:{port}  ·  IBKR live: {IBKR_ENABLED}  (Ctrl+C pour arreter)')
+    print(f'VERTEX -> http://localhost:{port}  ·  IBKR live: {IBKR_ENABLED}  (Ctrl+C pour arreter)')
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False, threaded=True)
 
 
