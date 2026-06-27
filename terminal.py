@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.5-strategie'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v3.6-strat-spec'       # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -600,7 +600,7 @@ def scan():
         recs.sort(key=lambda x: -x['score40'])
         # STRATÉGIE OPTIONS PERSONNALISÉE (1/2/3/6/9/12 mois) — Black-Scholes, zéro réseau
         try:
-            strat = strategy.build(rows, detail, top_n=6)
+            strat = strategy.build(rows, detail, market=mctx, top_n=6)
         except Exception:
             strat = scan_state.get('strategy')
         scan_state.update({'rows': rows, 'detail': detail, 'portfolio': pf, 'daily': daily_brief,
@@ -4209,28 +4209,53 @@ function buildAlerts(){
     +a.map(x=>`<div style="flex:1 1 45%;min-width:250px;background:#0c0c0c;border:1px solid ${x[2]}33;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:${x[2]};margin-bottom:3px">${x[0]} ${x[1]}</div><div style="font-size:11.5px;line-height:1.5">${x[3]}</div></div>`).join('')
     +`</div><div class="src">Détecté automatiquement depuis le board du jour (qualité, POP, danger, coût) · indicatif.</div></div>`;
 }
-function _money(v){return (v>=0?'+':'-')+'$'+fmt(Math.abs(Math.round(v)));}
+function _legRows(legs,sym){
+  return (legs||[]).map(function(l){
+    var sc=l.scenarios||{},pr=sc.prob||{},pe=sc.pess||{},ex=sc.except||{},tt=l.tp_tech,e=l.exit||{};
+    var u=l.sizes[0],ct=l.sizes[1];
+    return '<tr onclick="location.href=\''+'/titre/'+sym+'\'"><td class="sym">'+l.label+' <span class="muted">'+l.dte+'j·tenu~'+l.hold+'j</span></td>'
+      +'<td>$'+l.strike+' <span class="muted">Δ'+l.delta+'</span></td>'
+      +'<td>$'+l.premium+' <span class="muted" style="font-size:9px">/$'+fmt(l.premium*100)+'</span></td>'
+      +'<td class="'+(pr.pct>=0?'up':'dn')+'" style="font-weight:800">'+(pr.pct>=0?'+':'')+pr.pct+'% <span class="muted" style="font-size:9px">@$'+pr.px+'</span></td>'
+      +'<td style="font-size:11px"><span class="dn">'+pe.pct+'%</span> · <span class="up">+'+ex.pct+'%</span></td>'
+      +'<td class="'+((tt&&tt.pct>=0)?'up':'dn')+'">'+(tt?((tt.pct>=0?'+':'')+tt.pct+'%'):'—')+'</td>'
+      +'<td>'+u.contracts+' <span class="muted" style="font-size:9px">$'+fmt(u.cost)+'</span></td>'
+      +'<td>'+ct.contracts+' <span class="muted" style="font-size:9px">$'+fmt(ct.cost)+'</span></td>'
+      +'<td class="muted" style="font-size:10px"><span class="up">$'+e.tp100+'</span>/<span class="dn">$'+e.stop50+'</span></td>'
+      +'<td class="muted">'+(e.theta_alert_dte>0?'J-'+e.theta_alert_dte:'⚠️')+'</td></tr>';
+  }).join('');
+}
+function _stratTable(legs,sym){
+  return '<div class="tscroll"><table><thead><tr><th>Échéance</th><th>Strike Δ</th><th>Prime /contrat</th><th>🎯 Probable</th><th>Pess·Except</th><th>Cible tech</th><th style="color:#EF4444">5k</th><th style="color:#FFB23F">15k</th><th>TP+100/Stop-50</th><th>θ</th></tr></thead><tbody>'+_legRows(legs,sym)+'</tbody></table></div>';
+}
+window.__strat=null;
+window.stratDir=function(i,dir){var p=window.__strat.picks[i];var box=document.getElementById('legs'+i);if(!box)return;box.innerHTML=_stratTable(dir==='PUT'?p.put:p.call,p.symbol);
+  var bc=document.getElementById('bc'+i),bp=document.getElementById('bp'+i);if(bc)bc.className='chip'+(dir==='CALL'?' on':'');if(bp)bp.className='chip'+(dir==='PUT'?' on':'');};
 function buildMaStrat(){
   fetch('/api/strategie').then(function(r){return r.json()}).then(function(st){
     var el=document.getElementById('mastrat'); if(!el)return;
     var picks=(st&&st.picks)||[]; if(!picks.length){return;}
-    var pr=st.profile||{};
-    var h='<div class="panel" style="border-color:#A78BFA55"><div class="ph" style="background:linear-gradient(90deg,#A78BFA2e,transparent 70%)"><span style="color:#fff">🎯 MA STRATÉGIE OPTIONS · 1 · 2 · 3 · 6 · 9 · 12 mois</span><span class="cnt">'+picks.length+' convictions</span></div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px 6px"><div class="pchip" style="border-color:#A78BFA44;flex:1;min-width:170px"><div class="t" style="color:#A78BFA">🎯 Style</div><div class="d">'+(pr.style||'')+'</div></div><div class="pchip" style="border-color:#22C55E44;flex:1;min-width:170px"><div class="t" style="color:#22C55E">📐 Instrument</div><div class="d">'+(pr.instrument||'')+'</div></div><div class="pchip" style="border-color:#FFB23F44;flex:1;min-width:170px"><div class="t" style="color:#FFB23F">💰 Tailles</div><div class="d">'+(pr.sizing||'')+'</div></div></div>';
-    picks.forEach(function(p){
-      var dc=p.direction==='CALL'?C.g:C.r;
-      h+='<div style="padding:8px 14px 12px"><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px"><span class="sym" style="font-size:16px">'+p.symbol+'</span><span style="font-weight:800;color:'+dc+';border:1px solid '+dc+';border-radius:7px;padding:1px 9px;font-size:12px">'+(p.direction==='CALL'?'📈 CALL':'🛡️ PUT')+'</span><span class="muted">$'+p.price+'</span><span style="color:#F5B45B;font-weight:800">'+(p.grade||'')+'</span><span class="muted">· score '+(p.score!=null?p.score:'—')+' · IV '+p.iv+'%</span></div>';
-      h+='<div class="tscroll"><table><thead><tr><th>Échéance</th><th>Strike</th><th>Prime</th><th>Δ</th><th>Breakeven</th><th style="color:#EF4444">5k · contr.</th><th style="color:#EF4444">coût</th><th style="color:#EF4444">gain si +1σ</th><th style="color:#FFB23F">15k · contr.</th><th style="color:#FFB23F">coût</th><th style="color:#FFB23F">gain si +1σ</th><th>%/contrat</th></tr></thead><tbody>';
-      (p.legs||[]).forEach(function(l){
-        var u=l.sizes[0],ct=l.sizes[1];
-        h+='<tr onclick="location.href=\'/titre/'+p.symbol+'\'"><td class="sym">'+l.label+' <span class="muted">'+l.dte+'j</span></td><td>$'+l.strike+'</td><td>$'+l.premium+'</td><td>'+l.delta+'</td><td class="muted">$'+l.breakeven+'</td>'
-          +'<td>'+u.contracts+'</td><td class="muted">$'+fmt(u.cost)+'</td><td class="'+(u.gain_if_target>=0?'up':'dn')+'">'+_money(u.gain_if_target)+'</td>'
-          +'<td>'+ct.contracts+'</td><td class="muted">$'+fmt(ct.cost)+'</td><td class="'+(ct.gain_if_target>=0?'up':'dn')+'">'+_money(ct.gain_if_target)+'</td>'
-          +'<td class="'+(l.gain_if_target>=0?'up':'dn')+'">'+(l.gain_if_target>=0?'+':'')+l.gain_if_target+'%</td></tr>';
-      });
-      h+='</tbody></table></div></div>';
+    window.__strat=st; var pr=st.profile||{}; var rg=st.regime||'neutral';
+    var rgi=rg==='favorable'?['🟢 MARCHÉ FAVORABLE → biais CALL',C.g]:rg==='dangerous'?['🔴 MARCHÉ DANGEREUX → biais PUT',C.r]:['🟡 MARCHÉ NEUTRE',C.gold];
+    var h='<div class="panel" style="border-color:#A78BFA55"><div class="ph" style="background:linear-gradient(90deg,#A78BFA2e,transparent 70%)"><span style="color:#fff">🎯 MA STRATÉGIE OPTIONS · 1·2·3·6·9·12 mois</span><span class="cnt" style="color:'+rgi[1]+'">'+rgi[0]+'</span></div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px 4px">'
+      +'<div class="pchip" style="border-color:#A78BFA44;flex:1;min-width:160px"><div class="t" style="color:#A78BFA">🎯 Style</div><div class="d">'+(pr.style||'')+'</div></div>'
+      +'<div class="pchip" style="border-color:#22C55E44;flex:1;min-width:160px"><div class="t" style="color:#22C55E">📐 Delta</div><div class="d">'+(pr.delta||'')+'</div></div>'
+      +'<div class="pchip" style="border-color:#FFB23F44;flex:1;min-width:160px"><div class="t" style="color:#FFB23F">💰 Tailles</div><div class="d">'+(pr.sizing||'')+'</div></div></div>';
+    picks.forEach(function(p,i){
+      var dir=p.primary||'CALL';
+      h+='<div style="padding:8px 14px 14px;border-top:1px solid #ffffff10">'
+        +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px">'
+        +'<span class="sym" style="font-size:16px">'+p.symbol+'</span><span class="muted">$'+p.price+'</span>'
+        +'<span style="color:#F5B45B;font-weight:800">'+(p.grade||'')+'</span>'
+        +'<span class="muted">score '+(p.score!=null?p.score:'—')+' · IV '+p.iv+'%</span>'
+        +(p.iv_expensive?'<span style="color:#EF4444;font-size:10px;font-weight:700">⚠️ IV chère</span>':'')
+        +'<span style="margin-left:auto;display:flex;gap:5px">'
+        +'<span id="bc'+i+'" class="chip'+(dir==='CALL'?' on':'')+'" onclick="stratDir('+i+',\'CALL\')">📈 CALL</span>'
+        +'<span id="bp'+i+'" class="chip'+(dir==='PUT'?' on':'')+'" onclick="stratDir('+i+',\'PUT\')">🛡️ PUT</span></span></div>'
+        +'<div id="legs'+i+'">'+_stratTable(dir==='PUT'?p.put:p.call,p.symbol)+'</div></div>';
     });
-    h+='<div class="src">Contrats IDÉAUX calculés en Black-Scholes (delta cible décroissant par échéance) depuis le cours + volatilité — dispo même sans chaîne réseau. « gain si +1σ » = à un mouvement attendu d\'un écart-type sur l\'horizon. ⚠️ Perte max = prime payée (coût). Analyse éducative — jamais un conseil, aucun ordre.</div></div>';
+    h+='<div class="src">🔑 SPÉCULATION : l\'option est valorisée EN COURS DE ROUTE (mark-to-market, tenue ~1/3 de l\'échéance), pas à l\'expiration. 🎯 Probable = mouvement +1σ · Pess −0.5σ · Except +2σ · Cible tech = TP du plan. Sorties : prendre profit à +100% de la prime, stop à −50%, alerte θ à J-45 (érosion). Δ mix : agressif court, conservateur long. Perte max = coût. Analyse éducative — jamais un ordre.</div></div>';
     el.innerHTML=h;
   }).catch(function(){});
 }
