@@ -1203,6 +1203,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -1708,6 +1711,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -1750,7 +1756,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   <div class="dhead">
     <div>
       <div class="ttl">◣ TRADING DESK <span class="v">WATCHLIST</span></div>
-      <div class="sub">57 LEADERS US · SCORÉS · CLASSÉS · LONG-ONLY — TON BRIEF QUOTIDIEN</div>
+      <div class="sub">LEADERS US · S&P / NASDAQ / DOW · SCORÉS · CLASSÉS — TON BRIEF QUOTIDIEN</div>
     </div>
     <div class="meta">
       <span class="pill" id="dSpy">SPY $—</span>
@@ -1759,11 +1765,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     </div>
   </div>
   <div class="idxstrip" id="dIndices"></div>
-  <div class="kpiband" id="dKpi"></div>
+  <div class="kpiband" id="dKpi"><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div></div>
   <div id="dDetail" style="display:none;margin-bottom:14px"></div>
   <div class="stitle">📊 ÉTAT DU MARCHÉ</div>
   <div id="dVerdict" style="background:linear-gradient(135deg,#121212,#0a0a0a);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;margin:4px 0 14px">
-    <div id="dCmd" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #ffffff0d"></div>
+    <div id="dCmd" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #ffffff0d"><div class="skel" style="height:86px"></div></div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
       <div><div style="font-size:10px;letter-spacing:2px;color:#8794ab;font-weight:700;margin-bottom:6px">🧭 VERDICT DU JOUR</div>
       <div id="dVerdictTxt" style="font-size:17px;font-weight:800;letter-spacing:.3px">lecture du marché…</div></div>
@@ -2552,6 +2558,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -2726,6 +2735,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -2821,6 +2833,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -2927,6 +2942,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -3074,6 +3092,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -3419,6 +3440,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -3470,7 +3494,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <div class="disc">Analyse éducative — pas un conseil financier.</div>
     </div>
   </div>
-  <div class="kpiband" id="wlKpi"></div>
+  <div class="kpiband" id="wlKpi"><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div></div>
   <div class="grid" id="grid"></div>
   <div class="foot">Univers : <b id="wlFoot">leaders US</b> · scoré, classé, live · ⛔ analyse only — aucun ordre</div>
 </div>
@@ -3706,6 +3730,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -4013,6 +4040,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -4209,6 +4239,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
@@ -4252,7 +4285,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div><div class="htitle">ANALYSE ENTREPRISE</div><div class="hsub" id="hsub">…</div></div>
     <div class="hmeta"><div>Cours <b>en direct</b> + fondamentaux</div><div id="hsrc">…</div><div style="font-size:10px;color:#5b6678;margin-top:3px">Analyse éducative — pas un conseil · ⛔ aucun ordre</div></div>
   </div>
-  <div class="kpiband" id="entKpi"></div>
+  <div class="kpiband" id="entKpi"><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div></div>
   <div class="bar" id="bar"></div>
   <div class="panel"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
   <div class="foot">Trie en cliquant les colonnes · clic ligne → fiche complète · <b id="entFoot">titres US</b> · fondamentaux yfinance (P/E, marge, croissance) ; ROIC/PEG/EV-EBITDA non disponibles</div>
@@ -4401,6 +4434,9 @@ body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;backgr
 .panel:hover,.scard:hover,.card:hover,.fav:hover,.seccard:hover{border-color:rgba(255,140,50,.32)!important;box-shadow:0 0 26px rgba(255,140,50,.10)!important}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#26262e;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#3a3a44}
 ::selection{background:rgba(255,140,50,.28);color:#fff}
+/* skeleton loading (shimmer) */
+@keyframes shmr{0%{background-position:-260px 0}100%{background-position:calc(260px + 100%) 0}}
+.skel{background:#16171c;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.06) 45px,rgba(255,255,255,0) 90px);background-size:300px 100%;animation:shmr 1.15s infinite linear;border-radius:10px;color:transparent!important;border:1px solid rgba(255,255,255,.05)}
 /* bandeau KPI (cockpit + autres) */
 .kpiband{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0}
 .kc{background:linear-gradient(165deg,#16171c,#0d0e12);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 12px;min-width:0}
