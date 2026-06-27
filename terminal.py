@@ -76,13 +76,15 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.2-demo-cloud'       # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v3.3-demo-default'     # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
 # RÉALISTES mais FICTIFS (zéro réseau, faible mémoire) → pour visualiser le design
-# d'une journée type. Toujours marqué « DÉMO » dans l'UI. Active avec DEMO=1.
-DEMO_MODE = os.environ.get('DEMO') == '1'
+# d'une journée type. Toujours marqué « DÉMO » dans l'UI.
+# Par défaut ACTIVÉ sur le cloud (NO_IBKR=1) — robuste même si Render ne resynchronise
+# pas la variable d'env. Forcer avec DEMO=1, désactiver avec DEMO=0.
+DEMO_MODE = os.environ.get('DEMO', '1' if os.environ.get('NO_IBKR') == '1' else '0') == '1'
 REFRESH_SEC = 120   # ~170 titres scannés (core + big caps + trend) → intervalle large pour le plan gratuit
 
 app = Flask(__name__)
@@ -4860,15 +4862,24 @@ def titre_page(sym):
     return PAGE_TITRE
 
 
-def _start_app():
+def _start_workers():
+    """Démarre les threads de fond. En mode DÉMO (vitrine cloud) on ne lance QUE le
+    scan synthétique : les autres boucles (options/news/calendrier/hebdo/fondamentaux)
+    dépendent de yfinance — inutiles et coûteuses (mémoire/CPU) quand le réseau est
+    bloqué sur le serveur. Hors démo, tout démarre normalement."""
     threading.Thread(target=_loop, daemon=True).start()
-    threading.Thread(target=_opt_loop, daemon=True).start()
-    threading.Thread(target=_news_loop, daemon=True).start()
-    threading.Thread(target=_cal_loop, daemon=True).start()
-    threading.Thread(target=_weekly_loop, daemon=True).start()
-    threading.Thread(target=_fund_loop, daemon=True).start()
+    if not DEMO_MODE:
+        threading.Thread(target=_opt_loop, daemon=True).start()
+        threading.Thread(target=_news_loop, daemon=True).start()
+        threading.Thread(target=_cal_loop, daemon=True).start()
+        threading.Thread(target=_weekly_loop, daemon=True).start()
+        threading.Thread(target=_fund_loop, daemon=True).start()
     if IBKR_ENABLED:                                  # pas de TWS sur le cloud → on n'essaie pas
         threading.Thread(target=_quotes_worker, daemon=True).start()
+
+
+def _start_app():
+    _start_workers()
     port = int(os.environ.get('PORT', 5002))          # le cloud (Render…) impose le port via $PORT
     # host 0.0.0.0 = accessible réseau local (iPhone) ET cloud
     print(f'TRACK TERMINAL -> http://localhost:{port}  ·  IBKR live: {IBKR_ENABLED}  (Ctrl+C pour arreter)')
@@ -4877,14 +4888,7 @@ def _start_app():
 
 # démarre les threads dès l'import (pour gunicorn/cloud) si demandé, sinon en __main__
 if os.environ.get('START_ON_IMPORT') == '1':
-    threading.Thread(target=_loop, daemon=True).start()
-    threading.Thread(target=_opt_loop, daemon=True).start()
-    threading.Thread(target=_news_loop, daemon=True).start()
-    threading.Thread(target=_cal_loop, daemon=True).start()
-    threading.Thread(target=_weekly_loop, daemon=True).start()
-    threading.Thread(target=_fund_loop, daemon=True).start()
-    if IBKR_ENABLED:
-        threading.Thread(target=_quotes_worker, daemon=True).start()
+    _start_workers()
 
 if __name__ == '__main__':
     _start_app()
