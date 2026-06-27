@@ -4286,6 +4286,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div class="hmeta"><div>Cours <b>en direct</b> + fondamentaux</div><div id="hsrc">…</div><div style="font-size:10px;color:#5b6678;margin-top:3px">Analyse éducative — pas un conseil · ⛔ aucun ordre</div></div>
   </div>
   <div class="kpiband" id="entKpi"><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div><div class="kc skel" style="height:64px"></div></div>
+  <div class="bar" id="entFilter"></div>
   <div class="bar" id="bar"></div>
   <div class="panel"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
   <div class="foot">Trie en cliquant les colonnes · clic ligne → fiche complète · <b id="entFoot">titres US</b> · fondamentaux yfinance (P/E, marge, croissance) ; ROIC/PEG/EV-EBITDA non disponibles</div>
@@ -4317,10 +4318,30 @@ function cell(c){
   <td class="muted">${c.rsi!=null?Math.round(c.rsi):'—'}</td>
   <td style="color:${c.regime==='TREND'?C.g:c.regime==='CHOP'?C.r:C.gold}">${regTxt(c.regime)}</td>
   <td class="${c.earnSoon?'dn':'muted'}" style="${c.earnSoon?'font-weight:800':''}">${c.earn||'—'}</td></tr>`;}
+let FILTER={sector:'',minScore:0,q:''};
+function applyFilter(arr){return arr.filter(c=>{
+  if(FILTER.sector&&c.sector!==FILTER.sector)return false;
+  if(FILTER.minScore&&(c.score||0)<FILTER.minScore)return false;
+  if(FILTER.q&&!(c.symbol||'').toUpperCase().includes(FILTER.q))return false;
+  return true;});}
+window.setF=function(k,v){FILTER[k]=v;render();buildFilter();};
+window.entSearch=function(v){FILTER.q=(v||'').toUpperCase().trim();render();};
+function buildFilter(){
+  const el=document.getElementById('entFilter');if(!el)return;
+  const secs=[...new Set(DATA.map(c=>c.sector).filter(Boolean))].sort();
+  const chip=(lab,on,oc)=>`<span class="sbtn ${on?'on':''}" onclick="${oc}">${lab}</span>`;
+  el.innerHTML='Secteur : <select onchange="setF(\'sector\',this.value)" style="background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:8px;padding:5px 9px;font-size:12px">'
+    +'<option value="">Tous</option>'+secs.map(s=>`<option value="${s}"${FILTER.sector===s?' selected':''}>${s}</option>`).join('')+'</select>'
+    +'  Score : '+chip('Tous',!FILTER.minScore,"setF('minScore',0)")+chip('≥55',FILTER.minScore===55,"setF('minScore',55)")+chip('≥72',FILTER.minScore===72,"setF('minScore',72)")
+    +'  <input placeholder="🔍 ticker" oninput="entSearch(this.value)" value="'+(FILTER.q||'')+'" style="background:#0e0e0e;border:1px solid #1c1c24;color:#e8edf5;border-radius:8px;padding:5px 10px;font-size:12px;width:110px">'
+    +((FILTER.sector||FILTER.minScore||FILTER.q)?chip('✕ Reset',false,"FILTER={sector:'',minScore:0,q:''};render();buildFilter()"):'');
+}
 function render(){
   document.getElementById('thead').innerHTML='<tr>'+COLS.map(([k,l])=>`<th onclick="setSort('${k}')">${l}${SORT===k?(DIR<0?' ▾':' ▴'):''}</th>`).join('')+'</tr>';
-  const d=[...DATA].sort((a,b)=>{let x=a[SORT],y=b[SORT];if(x==null)return 1;if(y==null)return -1;if(typeof x==='string')return DIR*x.localeCompare(y);return DIR*(x-y);});
-  document.getElementById('tbody').innerHTML=d.map(cell).join('');
+  const base=applyFilter(DATA);
+  const d=[...base].sort((a,b)=>{let x=a[SORT],y=b[SORT];if(x==null)return 1;if(y==null)return -1;if(typeof x==='string')return DIR*x.localeCompare(y);return DIR*(x-y);});
+  document.getElementById('tbody').innerHTML=d.map(cell).join('')||'<tr><td colspan="17" class="muted" style="padding:18px;text-align:center">Aucune société ne correspond aux filtres.</td></tr>';
+  const hs=document.getElementById('hsub');if(hs&&base.length!==DATA.length)hs.textContent=base.length+' / '+DATA.length+' sociétés (filtré)';
 }
 function setSort(k){if(SORT===k)DIR=-DIR;else{SORT=k;DIR=(k==='symbol'||k==='sector')?1:-1;}render();updateBar();}
 function updateBar(){document.getElementById('bar').innerHTML='Trier : '+[['score','Score'],['change','Variation'],['mcap','Capitalisation'],['pe','P/E'],['rs','Force relative'],['growth','Croissance'],['margin','Marge']].map(([k,l])=>`<span class="sbtn ${SORT===k?'on':''}" onclick="setSort('${k}')">${l}</span>`).join('');}
@@ -4357,7 +4378,7 @@ async function load(){
       +kc('⚡','Momentum',nMom,'#F5B45B','RS ≥ 70')+kc('📈','En hausse',nUp,'#22C55E','aujourd hui')
       +kc('⚠️','Risque fonda',nRisk,'#EF4444','marge/croiss. faible');}
   var ef=document.getElementById('entFoot');if(ef)ef.textContent=(s.universe_n||DATA.length)+' titres US';
-  updateBar();render();
+  updateBar();buildFilter();render();
 }
 load();setInterval(load,12000);
 </script></body></html>"""
