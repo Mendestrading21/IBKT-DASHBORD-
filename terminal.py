@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr
+from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy
 
 DAILY_PREV_PATH = os.path.join(os.path.dirname(__file__), 'daily_prev.json')  # baseline diff jour/jour
 WEEKLY_PATH = os.path.join(os.path.dirname(__file__), 'weekly_snapshot.json')  # sélection hebdo FIGÉE
@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.4-demo20'           # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v3.5-strategie'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -90,7 +90,7 @@ REFRESH_SEC = 120   # ~170 titres scannés (core + big caps + trend) → interva
 app = Flask(__name__)
 scan_state = {'rows': [], 'detail': {}, 'portfolio': None, 'options_board': [], 'daily': None,
               'anomalies': [], 'sectors': [], 'market_ctx': None, 'fundamentals': None, 'indices': [],
-              'recommendations': [], 'updated': None, 'error': None}
+              'recommendations': [], 'strategy': None, 'updated': None, 'error': None}
 
 
 # ─── helpers numériques ───────────────────────────────────────────────────
@@ -449,7 +449,12 @@ def _download_universe(tickers, period='1y', chunk=50):
 # (graine = CRC du ticker) → chiffres STABLES d'un scan à l'autre, comme une vraie
 # journée figée. JAMAIS présenté comme du réel : badge « 🎭 DÉMO » dans l'UI.
 _DEMO_BASE = {'SPY': 600.0, '^GSPC': 6000.0, '^IXIC': 20000.0, '^DJI': 44000.0,
-              '^RUT': 2300.0, '^VIX': 15.0}
+              '^RUT': 2300.0, '^VIX': 15.0,
+              # prix réalistes pour les 20 titres scannés en démo (vitrine crédible)
+              'AAPL': 230.0, 'NVDA': 140.0, 'MSFT': 440.0, 'META': 600.0, 'GOOGL': 180.0,
+              'AMZN': 210.0, 'AVGO': 170.0, 'TSLA': 340.0, 'NFLX': 900.0, 'AMD': 140.0,
+              'CRM': 330.0, 'COST': 950.0, 'LLY': 800.0, 'JPM': 250.0, 'V': 310.0,
+              'MA': 520.0, 'HD': 410.0, 'UNH': 520.0, 'XOM': 110.0, 'WMT': 95.0}
 
 
 def _demo_one(sym, n=260):
@@ -593,9 +598,14 @@ def scan():
                              'raison': v['raison'], 'action': v['action'],
                              'pros': (dec or {}).get('pros', [])[:2]})
         recs.sort(key=lambda x: -x['score40'])
+        # STRATÉGIE OPTIONS PERSONNALISÉE (1/2/3/6/9/12 mois) — Black-Scholes, zéro réseau
+        try:
+            strat = strategy.build(rows, detail, top_n=6)
+        except Exception:
+            strat = scan_state.get('strategy')
         scan_state.update({'rows': rows, 'detail': detail, 'portfolio': pf, 'daily': daily_brief,
                            'anomalies': anoms, 'sectors': secs, 'market_ctx': mctx, 'indices': indices,
-                           'recommendations': recs,
+                           'recommendations': recs, 'strategy': strat,
                            'breadth': breadth, 'spy': spy, 'market': market_status(),
                            'universe_n': len(syms_scan), 'scanned_n': len(rows),
                            'scan_ts': time.time(),
@@ -929,6 +939,12 @@ def api_search():
 @app.route('/api/weekly')
 def api_weekly():
     return jsonify(weekly_state.get('data') or {})
+
+
+@app.route('/api/strategie')
+def api_strategie():
+    """Stratégie options personnalisée (1/2/3/6/9/12 mois). Lecture seule, analyse only."""
+    return jsonify(scan_state.get('strategy') or {})
 
 
 @app.route('/healthz')
@@ -4020,6 +4036,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div class="pchip" style="border-color:#38BDF844"><div class="t" style="color:#38BDF8">⚡ Swing (moyen)</div><div class="d">~3 mois · delta 0.50-0.70 · mouvement rapide · taille modérée</div></div>
     <div class="pchip" style="border-color:#FFB23F44"><div class="t" style="color:#FFB23F">🎲 Tactique (court)</div><div class="d">1-2 mois · théta violent · petite taille · setup exceptionnel only</div></div>
   </div>
+  <div id="mastrat"></div>
   <div id="feat"></div>
   <div id="alerts"></div>
   <div class="stats" id="stats"></div>
@@ -4192,6 +4209,32 @@ function buildAlerts(){
     +a.map(x=>`<div style="flex:1 1 45%;min-width:250px;background:#0c0c0c;border:1px solid ${x[2]}33;border-radius:10px;padding:11px 13px"><div style="font-size:12px;font-weight:800;color:${x[2]};margin-bottom:3px">${x[0]} ${x[1]}</div><div style="font-size:11.5px;line-height:1.5">${x[3]}</div></div>`).join('')
     +`</div><div class="src">Détecté automatiquement depuis le board du jour (qualité, POP, danger, coût) · indicatif.</div></div>`;
 }
+function _money(v){return (v>=0?'+':'-')+'$'+fmt(Math.abs(Math.round(v)));}
+function buildMaStrat(){
+  fetch('/api/strategie').then(function(r){return r.json()}).then(function(st){
+    var el=document.getElementById('mastrat'); if(!el)return;
+    var picks=(st&&st.picks)||[]; if(!picks.length){return;}
+    var pr=st.profile||{};
+    var h='<div class="panel" style="border-color:#A78BFA55"><div class="ph" style="background:linear-gradient(90deg,#A78BFA2e,transparent 70%)"><span style="color:#fff">🎯 MA STRATÉGIE OPTIONS · 1 · 2 · 3 · 6 · 9 · 12 mois</span><span class="cnt">'+picks.length+' convictions</span></div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px 6px"><div class="pchip" style="border-color:#A78BFA44;flex:1;min-width:170px"><div class="t" style="color:#A78BFA">🎯 Style</div><div class="d">'+(pr.style||'')+'</div></div><div class="pchip" style="border-color:#22C55E44;flex:1;min-width:170px"><div class="t" style="color:#22C55E">📐 Instrument</div><div class="d">'+(pr.instrument||'')+'</div></div><div class="pchip" style="border-color:#FFB23F44;flex:1;min-width:170px"><div class="t" style="color:#FFB23F">💰 Tailles</div><div class="d">'+(pr.sizing||'')+'</div></div></div>';
+    picks.forEach(function(p){
+      var dc=p.direction==='CALL'?C.g:C.r;
+      h+='<div style="padding:8px 14px 12px"><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px"><span class="sym" style="font-size:16px">'+p.symbol+'</span><span style="font-weight:800;color:'+dc+';border:1px solid '+dc+';border-radius:7px;padding:1px 9px;font-size:12px">'+(p.direction==='CALL'?'📈 CALL':'🛡️ PUT')+'</span><span class="muted">$'+p.price+'</span><span style="color:#F5B45B;font-weight:800">'+(p.grade||'')+'</span><span class="muted">· score '+(p.score!=null?p.score:'—')+' · IV '+p.iv+'%</span></div>';
+      h+='<div class="tscroll"><table><thead><tr><th>Échéance</th><th>Strike</th><th>Prime</th><th>Δ</th><th>Breakeven</th><th style="color:#EF4444">5k · contr.</th><th style="color:#EF4444">coût</th><th style="color:#EF4444">gain si +1σ</th><th style="color:#FFB23F">15k · contr.</th><th style="color:#FFB23F">coût</th><th style="color:#FFB23F">gain si +1σ</th><th>%/contrat</th></tr></thead><tbody>';
+      (p.legs||[]).forEach(function(l){
+        var u=l.sizes[0],ct=l.sizes[1];
+        h+='<tr onclick="location.href=\'/titre/'+p.symbol+'\'"><td class="sym">'+l.label+' <span class="muted">'+l.dte+'j</span></td><td>$'+l.strike+'</td><td>$'+l.premium+'</td><td>'+l.delta+'</td><td class="muted">$'+l.breakeven+'</td>'
+          +'<td>'+u.contracts+'</td><td class="muted">$'+fmt(u.cost)+'</td><td class="'+(u.gain_if_target>=0?'up':'dn')+'">'+_money(u.gain_if_target)+'</td>'
+          +'<td>'+ct.contracts+'</td><td class="muted">$'+fmt(ct.cost)+'</td><td class="'+(ct.gain_if_target>=0?'up':'dn')+'">'+_money(ct.gain_if_target)+'</td>'
+          +'<td class="'+(l.gain_if_target>=0?'up':'dn')+'">'+(l.gain_if_target>=0?'+':'')+l.gain_if_target+'%</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    });
+    h+='<div class="src">Contrats IDÉAUX calculés en Black-Scholes (delta cible décroissant par échéance) depuis le cours + volatilité — dispo même sans chaîne réseau. « gain si +1σ » = à un mouvement attendu d\'un écart-type sur l\'horizon. ⚠️ Perte max = prime payée (coût). Analyse éducative — jamais un conseil, aucun ordre.</div></div>';
+    el.innerHTML=h;
+  }).catch(function(){});
+}
+buildMaStrat();setInterval(buildMaStrat,30000);
 load();setInterval(load,20000);
 </script></body></html>"""
 

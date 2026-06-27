@@ -32,7 +32,7 @@ def test_healthz():
 def test_api_routes_200():
     c = _client()
     for path in ["/api/healthz", "/api/market/summary", "/api/cockpit",
-                 "/api/watchlist", "/api/options", "/api/weekly"]:
+                 "/api/watchlist", "/api/options", "/api/weekly", "/api/strategie"]:
         assert c.get(path).status_code == 200, path
 
 
