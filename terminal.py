@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v3.6-strat-spec'       # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v3.7-portefeuille'     # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -945,6 +945,24 @@ def api_weekly():
 def api_strategie():
     """Stratégie options personnalisée (1/2/3/6/9/12 mois). Lecture seule, analyse only."""
     return jsonify(scan_state.get('strategy') or {})
+
+
+@app.route('/api/portefeuille')
+def api_portefeuille():
+    """Portefeuille d'options construit sur un capital (50k/100k/200k…). Analyse only."""
+    try:
+        cap = int(float(request.args.get('capital', 100000)))
+    except Exception:
+        cap = 100000
+    cap = max(5000, min(cap, 1000000))
+    rows = scan_state.get('rows')
+    if not rows:
+        return jsonify({})
+    try:
+        return jsonify(strategy.build_portfolio(rows, scan_state.get('detail'),
+                                                market=scan_state.get('market_ctx'), capital=cap))
+    except Exception as e:
+        return jsonify({'error': f'{type(e).__name__}: {e}'})
 
 
 @app.route('/healthz')
@@ -4037,6 +4055,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <div class="pchip" style="border-color:#FFB23F44"><div class="t" style="color:#FFB23F">🎲 Tactique (court)</div><div class="d">1-2 mois · théta violent · petite taille · setup exceptionnel only</div></div>
   </div>
   <div id="mastrat"></div>
+  <div id="portef"></div>
   <div id="feat"></div>
   <div id="alerts"></div>
   <div class="stats" id="stats"></div>
@@ -4260,6 +4279,36 @@ function buildMaStrat(){
   }).catch(function(){});
 }
 buildMaStrat();setInterval(buildMaStrat,30000);
+window.portefCap=100000;
+window.setPortefCap=function(c){window.portefCap=c;buildPortef();};
+function buildPortef(){
+  fetch('/api/portefeuille?capital='+window.portefCap).then(function(r){return r.json()}).then(function(pf){
+    var el=document.getElementById('portef'); if(!el)return;
+    var caps=[50000,100000,200000];
+    var sel='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px 4px;align-items:center"><span class="muted" style="font-size:11px;font-weight:700">CAPITAL :</span>'
+      +caps.map(function(v){return '<span class="chip'+(v===window.portefCap?' on':'')+'" onclick="setPortefCap('+v+')">$'+fmt(v)+'</span>';}).join('')+'</div>';
+    var head='<div class="panel" style="border-color:#22C55E55"><div class="ph" style="background:linear-gradient(90deg,#22C55E22,transparent 70%)"><span style="color:#fff">💼 MON PORTEFEUILLE OPTIONS</span><span class="cnt">'+((pf&&pf.n)||0)+' positions</span></div>'+sel;
+    var pos=(pf&&pf.positions)||[];
+    if(!pos.length){el.innerHTML=head+'<div class="src">En attente du scan… (les positions apparaissent dès que les données sont prêtes)</div></div>';return;}
+    var st='<div class="stats" style="padding:10px 14px">'
+      +'<div class="stat"><div class="n">$'+fmt(pf.deployed)+'</div><div class="l">déployé</div></div>'
+      +'<div class="stat"><div class="n" style="color:#8794ab">$'+fmt(pf.cash)+'</div><div class="l">cash réserve</div></div>'
+      +'<div class="stat"><div class="n dn">-$'+fmt(pf.maxloss)+'</div><div class="l">perte max</div></div>'
+      +'<div class="stat"><div class="n up">+$'+fmt(pf.gain_prob)+'</div><div class="l">gain probable +'+pf.gain_prob_pct+'%</div></div>'
+      +'<div class="stat"><div class="n up">+$'+fmt(pf.gain_exc)+'</div><div class="l">except. +'+pf.gain_exc_pct+'%</div></div></div>';
+    var rws=pos.map(function(p){var dc=p.dir==='CALL'?C.g:C.r;var rc=p.role==='CŒUR'?C.blue:C.gold;
+      return '<tr onclick="location.href=\'/titre/'+p.sym+'\'"><td class="sym">'+p.sym+' <span style="color:#F5B45B;font-size:9px">'+(p.grade||'')+'</span></td>'
+        +'<td><span style="color:'+rc+';font-weight:700;font-size:10px">'+p.role+'</span></td>'
+        +'<td style="color:'+dc+';font-weight:700">'+(p.dir==='CALL'?'📈':'🛡️')+'</td>'
+        +'<td>'+p.horizon+'</td><td>$'+p.strike+' <span class="muted">Δ'+p.delta+'</span></td>'
+        +'<td>'+p.contracts+'</td><td>$'+fmt(p.cost)+'</td><td class="muted">'+Math.round(p.cost/pf.capital*100)+'%</td>'
+        +'<td class="up">+$'+fmt(p.gain_prob)+' <span class="muted" style="font-size:9px">+'+p.prob_pct+'%</span></td>'
+        +'<td class="up">+$'+fmt(p.gain_exc)+'</td><td class="dn">-$'+fmt(p.maxloss)+'</td></tr>';}).join('');
+    var tbl='<div class="tscroll"><table><thead><tr><th>Titre</th><th>Rôle</th><th>Sens</th><th>Échéance</th><th>Strike Δ</th><th>Contr.</th><th>Coût</th><th>%</th><th>Gain probable</th><th>Except.</th><th>Perte max</th></tr></thead><tbody>'+rws+'</tbody></table></div>';
+    el.innerHTML=head+st+tbl+'<div class="src">💼 '+pf.n+' positions · '+Math.round(pf.deployed/pf.capital*100)+'% déployé ('+Math.round(pf.cash/pf.capital*100)+'% cash réserve) · CŒUR contrôlé 3-6-9 mois (delta haut, façon « action ») + SATELLITES offensifs 1-2 mois OTM · risque ≤10%/position · régime '+(pf.regime||'')+'. Gains = scénarios mark-to-route (revente avant échéance, pas à l\'expiration). Analyse éducative — jamais un ordre.</div></div>';
+  }).catch(function(){});
+}
+buildPortef();setInterval(buildPortef,60000);
 load();setInterval(load,20000);
 </script></body></html>"""
 
