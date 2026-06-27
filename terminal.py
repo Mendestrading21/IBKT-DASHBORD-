@@ -3470,8 +3470,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       <div class="disc">Analyse éducative — pas un conseil financier.</div>
     </div>
   </div>
+  <div class="kpiband" id="wlKpi"></div>
   <div class="grid" id="grid"></div>
-  <div class="foot">Univers : <b>57 leaders US</b> · scoré, classé, live · <b>scstradingdesk</b> · ⛔ analyse only — aucun ordre</div>
+  <div class="foot">Univers : <b id="wlFoot">leaders US</b> · scoré, classé, live · ⛔ analyse only — aucun ordre</div>
 </div>
 <script>
 const C={g:'#22C55E',r:'#EF4444',o:'#FF8C32',gold:'#F5B45B',blue:'#38BDF8',vio:'#A78BFA',cy:'#34D399'};
@@ -3494,6 +3495,22 @@ async function load(){
   document.getElementById('hdate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
   document.getElementById('hsess').textContent=(SE[m.session]||'—')+' · '+(m.et||'');
   document.getElementById('hsrc').textContent=((q&&q.meta&&q.meta.rt)?'TEMPS RÉEL IBKR':'yfinance différé ~15min')+(s.scanned_n?' · '+s.scanned_n+'/'+s.universe_n+' titres analysés':'');
+  // ── BANDEAU KPI SCANNER ──
+  const kc=(ic,t,v,c,sub)=>`<div class="kc"><div class="kt">${ic} ${t}</div><div class="kv" style="color:${c||'#e8edf5'}">${v}</div>${sub?`<div class="ks">${sub}</div>`:''}</div>`;
+  const nSS=recs.filter(r=>r.niveau==='S+'||r.niveau==='S').length;
+  const nBuy=recs.filter(r=>r.tone==='buy'&&r.timing==='BUY_NOW').length;
+  const nPull=recs.filter(r=>r.tone==='pullback'||r.timing==='BUY_PULLBACK').length;
+  const nBrk=recs.filter(r=>r.timing==='WATCH_BREAKOUT').length;
+  const nVol=rows.filter(r=>(r.volx||0)>=2).length;
+  const optSyms=new Set((s.options_board||[]).map(c=>c.sym)).size;
+  const nRisk=recs.filter(r=>r.tone==='avoid').length;
+  const wk=document.getElementById('wlKpi');
+  if(wk)wk.innerHTML=kc('📡','Analysés',s.scanned_n!=null?s.scanned_n:'—','#e8edf5','/ '+(s.universe_n||'—')+' univers')
+    +kc('⭐','S+ / S',nSS,'#FF8C32','setups premium')+kc('✅','Achat now',nBuy,C.g,'timing favorable')
+    +kc('⏳','Attente repli',nPull,C.cy,'bons mais hauts')+kc('👀','Breakout',nBrk,C.blue,'cassure proche')
+    +kc('🔥','Volume anormal',nVol,C.gold,'RVOL ≥ 2x')+kc('💎','Options',optSyms,'#A78BFA','candidats')
+    +kc('⚠️','Risk alerts',nRisk,C.r,'à éviter');
+  const wf=document.getElementById('wlFoot');if(wf)wf.textContent=(s.universe_n||'—')+' titres US';
   const byChg=rows.filter(r=>typeof r.change==='number').sort((a,b)=>b.change-a.change);
   const out=[];
   // 0 — VUE MARCHÉ : bande indices + panneau macro (en-tête plateforme)
