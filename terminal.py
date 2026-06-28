@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v5.1-vertex-fiche'     # marqueur de version (visible dans /healthz)
+BUILD = 'VERTEX-1.0'            # marqueur de version (visible dans /healthz)
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -1140,6 +1140,9 @@ def healthz():
         'last_scan': scan_state.get('updated'),
         'scan_age': round(time.time() - scan_state['scan_ts']) if scan_state.get('scan_ts') else None,
         'scan_error': scan_state.get('error'),
+        'vertex_ready': sum(1 for d in (scan_state.get('detail') or {}).values() if d.get('vertex')),
+        'engines': ['scoring', 'pivots', 'committee', 'strategy', 'portfolio_risk',
+                    'vertex', 'vertex_ml', 'validator'],
     }), 200
 
 
