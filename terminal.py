@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.5-vertex-mc'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.6-vertex-ui'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -1000,11 +1000,19 @@ def api_command():
     else:
         regime = {'label': '🟡 NEUTRE', 'color': '#FFB23F'}
     regime.update({'score': score, 'spy_regime': reg, 'roro': roro})
-    # top 5 actions (comité actionnable)
+    # top 5 actions (comité actionnable) + bloc VERTEX (edge probabiliste)
     decisions = cm.get('decisions') or []
+
+    def _vtx(sym):
+        v = (detail.get(sym) or {}).get('vertex') or {}
+        mc2 = v.get('mc') or {}
+        return {'verdict': v.get('verdict'), 'edge': v.get('edge'),
+                'p_tp1': mc2.get('p_hit_tp1'), 'edge_bps': mc2.get('edge_mean_bps'),
+                'no_trade': v.get('no_trade')}
     top_stocks = [{'symbol': d['symbol'], 'verdict': d['verdict'], 'color': d['color'],
                    'conviction': d['conviction'], 'price': d['price'],
-                   'rr': (d.get('plan') or {}).get('rr'), 'note': d['note']}
+                   'rr': (d.get('plan') or {}).get('rr'), 'note': d['note'],
+                   'vertex': _vtx(d['symbol'])}
                   for d in decisions if d['verdict'] in ('ACHETER', 'RENFORCER')][:5]
     # top 5 options (meilleure échéance 6 mois)
     top_options = []
@@ -2273,7 +2281,7 @@ function buildVertexCmd(){
     if(k.alerts&&k.alerts.length){h+='<div style="padding:0 16px 10px;display:flex;flex-direction:column;gap:6px">'+k.alerts.map(function(a){return '<div style="background:rgba(239,68,68,.08);border:1px solid #EF444444;border-radius:9px;padding:8px 11px;font-size:11.5px"><b style="color:#F87171">'+a[0]+' '+a[1]+'</b> — '+a[2]+'</div>';}).join('')+'</div>';}
     var ts=k.top_stocks||[],to=k.top_options||[];
     h+='<div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 16px 14px">'
-      +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#FF8C32;margin-bottom:6px">📈 TOP ACTIONS</div>'+(ts.length?ts.map(function(x){return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="color:'+x.color+';font-weight:800;font-size:11px">'+x.verdict+'</span><span class="muted" style="font-size:10px">R:R '+(x.rr||0)+':1</span><span style="margin-left:auto;font-size:10px;color:#8794ab">conv '+x.conviction+'</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">Aucun achat validé — patience.</div>')+'</div>'
+      +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#FF8C32;margin-bottom:6px">📈 TOP ACTIONS <span class="muted" style="font-weight:400">· 🔺 edge Vertex</span></div>'+(ts.length?ts.map(function(x){var vt=x.vertex||{};var vb=vt.edge!=null?' <span style="color:#A78BFA;font-size:9px;font-weight:700">🔺'+vt.edge+(vt.p_tp1!=null?' · TP1 '+Math.round(vt.p_tp1*100)+'%':'')+'</span>':'';return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px;flex-wrap:wrap"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="color:'+x.color+';font-weight:800;font-size:11px">'+x.verdict+'</span><span class="muted" style="font-size:10px">R:R '+(x.rr||0)+':1</span>'+vb+'<span style="margin-left:auto;font-size:10px;color:#8794ab">conv '+x.conviction+'</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">Aucun achat validé — patience.</div>')+'</div>'
       +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#A78BFA;margin-bottom:6px">💎 TOP OPTIONS CALL</div>'+(to.length?to.map(function(x){return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="font-size:10px;color:#8794ab">'+x.label+' $'+x.strike+'</span><span style="margin-left:auto;font-size:11px" class="up">+'+x.prob+'%</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">—</div>')+'</div></div>';
     var ex=k.exposure||{};
     h+='<div class="src" style="padding:6px 16px 12px">📌 Cible d\'exposition : Actions '+ex.actions+' · Options '+ex.options+' · ETF '+ex.etf+' · ⛔ aucun ordre — décisions, scores & plans uniquement.</div></div>';
@@ -2300,7 +2308,8 @@ function buildComite(cm){
       +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="sym" style="font-size:15px">'+x.symbol+'</span>'
       +(x.theme?'<span style="font-size:9px;color:#A78BFA;font-weight:700">★ thème</span>':'')+'<span class="muted">$'+x.price+'</span>'
       +'<span style="font-weight:900;color:'+x.color+';margin-left:auto;font-size:13px">'+x.verdict+'</span>'
-      +'<span style="font-size:11px;color:#8794ab">conv. '+x.conviction+'/100</span></div>'
+      +'<span style="font-size:11px;color:#8794ab">conv. '+x.conviction+'/100</span>'
+      +((x.vertex&&x.vertex.edge!=null)?'<span style="font-size:10px;font-weight:700;color:#A78BFA;border:1px solid #A78BFA55;border-radius:6px;padding:1px 6px">🔺 '+(x.vertex.verdict||'').replace('VERTEX ','')+' '+x.vertex.edge+'</span>':'')+'</div>'
       +'<div style="font-size:11px;margin:7px 0;display:flex;gap:10px;flex-wrap:wrap">'+gate(g.company)+' Entreprise '+gate(g.catalyst)+' Catalyseur '+gate(g.timing)+' Timing '+gate(g.rr)+' R:R '+(p.rr||0)+':1</div>'
       +'<div style="font-size:11.5px;color:#cfd8e6;line-height:1.5"><b style="color:'+x.color+'">'+x.note+'</b></div>'
       +'<div style="font-size:11px;color:#8794ab;margin-top:5px;line-height:1.55">📊 <b>Thèse :</b> '+x.thesis+'<br>🎯 <b>Plan :</b> entrée $'+p.entry+' · stop <span class="dn">$'+p.stop+'</span> · cible <span class="up">$'+p.tp2+'</span> · R:R '+(p.rr||0)+':1<br>🛑 <b>Invalidation :</b> '+x.invalidation+'</div></div>';
