@@ -11,6 +11,7 @@ Principes V1 : déterministe · pur · rapide · robuste (jamais de crash si don
 manquante) · aucun appel API · aucune dépendance lourde · aucun ordre.
 ⛔ ANALYSE ÉDUCATIVE — jamais un conseil, jamais une promesse de battre le marché.
 """
+import numpy as np
 
 
 def _f(x, d=0.0):
@@ -188,6 +189,52 @@ def institutionality(d):
         return 0
 
 
+# ── MOTEUR PROBABILISTE MONTE-CARLO (Vertex v2) ───────────────────────────────
+def monte_carlo_edge(d, n_paths=1200, days=45):
+    """Simule des trajectoires (GBM) du sous-jacent sur l'horizon de trade et
+    estime : proba de toucher TP1, proba de toucher le stop AVANT TP1 (first-touch),
+    edge moyen et intervalle de confiance (P10/P90). Déterministe (graine = inputs)
+    → réplicable backtest/live. Pur numpy, pas d'appel réseau."""
+    try:
+        plan = d.get('plan') or {}
+        S = _f(plan.get('entry') or d.get('price'))
+        stop = _f(plan.get('stop'))
+        tp1 = _f(plan.get('tp1'))
+        tp2 = _f(plan.get('tp2'))
+        atr = _f(plan.get('atr')) or S * 0.02
+        if S <= 0 or stop <= 0 or stop >= S or tp1 <= S:
+            return None
+        sig_d = max(atr / S, 0.003)                              # vol quotidienne (ATR%)
+        mom21 = _f(d.get('roc')) / 100.0                         # ROC ~21 séances
+        mu_d = float(np.clip(mom21 / 21.0, -0.003, 0.004))       # drift quotidien borné
+        seed = (int(abs(S * 1000)) + int(abs(stop * 10)) + days) % (2 ** 32)
+        rng = np.random.default_rng(seed)
+        shocks = rng.normal(mu_d - 0.5 * sig_d ** 2, sig_d, (n_paths, days))
+        path = S * np.exp(np.cumsum(shocks, axis=1))
+        tp1_touch = path >= tp1
+        stop_touch = path <= stop
+        BIG = days + 1
+        first_tp1 = np.where(tp1_touch.any(1), tp1_touch.argmax(1), BIG)
+        first_stop = np.where(stop_touch.any(1), stop_touch.argmax(1), BIG)
+        p_tp1 = float(tp1_touch.any(1).mean())
+        p_tp2 = float((path >= tp2).any(1).mean()) if tp2 > S else 0.0
+        p_stop_first = float((first_stop < first_tp1).mean())
+        p_tp1_first = float((first_tp1 < first_stop).mean())
+        ret = path[:, -1] / S - 1.0                              # rendement terminal
+        edge_mean = float(ret.mean())
+        ci_low = float(np.percentile(ret, 10))
+        ci_high = float(np.percentile(ret, 90))
+        return {
+            'p_hit_tp1': round(p_tp1, 3), 'p_hit_tp2': round(p_tp2, 3),
+            'p_tp1_first': round(p_tp1_first, 3), 'p_stop_before_tp1': round(p_stop_first, 3),
+            'edge_mean_bps': round(edge_mean * 10000), 'edge_ci_low_bps': round(ci_low * 10000),
+            'edge_ci_high_bps': round(ci_high * 10000),
+            'n_paths': n_paths, 'days': days,
+        }
+    except Exception:
+        return None
+
+
 # ── FONCTION CENTRALE ─────────────────────────────────────────────────────────
 _ACTION = {
     'VERTEX S+': 'Setup d\'élite — conviction maximale, déployer (cœur + option CALL).',
@@ -213,9 +260,31 @@ def evaluate(detail):
         # EDGE composite (puis pénalité d'extension)
         base = 0.30 * tq + 0.24 * eq + 0.18 * rr + 0.16 * em + 0.12 * inst
         edge = round(_clamp(base - 0.25 * ext_pen))
+
+        # ── COUCHE PROBABILISTE MONTE-CARLO (Vertex v2) ───────────────────────
+        mc = monte_carlo_edge(d)
+        risk_flags = []
+        no_trade = False
+        if d.get('regime') == 'CHOP':
+            risk_flags.append('regime_chop')
+        if ext_pen >= 55:
+            risk_flags.append('extension_extreme')
+        if mc:
+            if mc['p_stop_before_tp1'] > mc['p_tp1_first']:
+                risk_flags.append('stop_plus_probable_que_cible')
+            # edge incertain : intervalle de confiance traverse zéro
+            ci_crosses_zero = mc['edge_ci_low_bps'] < 0 < mc['edge_ci_high_bps']
+            if ci_crosses_zero and (d.get('regime') == 'CHOP' or ext_pen >= 45):
+                no_trade = True
+                risk_flags.append('edge_incertain_et_risque_eleve')
+            # bonus/malus d'edge selon la proba first-touch
+            edge = round(_clamp(edge + (mc['p_tp1_first'] - mc['p_stop_before_tp1']) * 18))
+
         kelly = kelly_cap(edge, d.get('confidence'), max(rr_detail.get('rr2', 2.0), 1.0))
 
-        if edge >= 82 and ext_pen < 40 and rr >= 58 and tq >= 70:
+        if no_trade:
+            verdict = 'VERTEX AVOID'
+        elif edge >= 82 and ext_pen < 40 and rr >= 58 and tq >= 70:
             verdict = 'VERTEX S+'
         elif edge >= 70 and ext_pen < 55:
             verdict = 'VERTEX BUY'
@@ -232,7 +301,8 @@ def evaluate(detail):
             'expected_move': em, 'asymmetry': asym, 'institutionality': inst,
             'extension_penalty': ext_pen,
             'kelly': {'pct': kelly, 'note': 'indicatif · demi-Kelly capé 12 % · jamais automatique'},
-            'rr_detail': rr_detail,
+            'rr_detail': rr_detail, 'mc': mc,
+            'no_trade': no_trade, 'risk_flags': risk_flags,
             'verdict': verdict, 'action': _ACTION.get(verdict, ''),
         }
     except Exception:

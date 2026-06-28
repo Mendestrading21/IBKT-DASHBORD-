@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.4-vertex-core'      # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.5-vertex-mc'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -339,10 +339,23 @@ def backtest(data, lb=126, top_n=5, smin=58, eq0=100000.0):
     peak = pd.Series(eq).cummax()
     closed = [j for j in journal if j['action'] == 'SELL']
     wins = [j for j in closed if (j['pnl'] or 0) > 0]
+    losses = [j for j in closed if (j['pnl'] or 0) <= 0]
+    # ── FONCTION DE VÉRITÉ ÉLARGIE (Sortino, CAGR, expectancy, turnover) ────────
+    years = max(len(idx) / 252.0, 1e-9)
+    down = drs[drs < 0]
+    sortino = round(float(drs.mean() / down.std() * math.sqrt(252)), 2) if len(down) > 1 and down.std() else 0
+    cagr = round(((eq[-1] / eq0) ** (1 / years) - 1) * 100, 2) if eq[-1] > 0 else 0
+    pnls = [j['pnl'] or 0 for j in closed]
+    expectancy = round(sum(pnls) / len(pnls), 2) if pnls else 0          # % moyen / trade
+    avg_win = round(sum(j['pnl'] for j in wins) / len(wins), 2) if wins else 0
+    avg_loss = round(sum(j['pnl'] for j in losses) / len(losses), 2) if losses else 0
+    turnover = round(len(closed) / years / max(top_n, 1), 1)            # rotations/slot/an
     return {
         'dates': [d.strftime('%Y-%m-%d') for d in idx], 'equity': [round(x) for x in eq],
         'balance': round(eq[-1], 2), 'total': round((eq[-1] / eq0 - 1) * 100, 2),
         'sharpe': round(float(drs.mean() / drs.std() * math.sqrt(252)), 2) if drs.std() else 0,
+        'sortino': sortino, 'cagr': cagr, 'expectancy': expectancy,
+        'avg_win': avg_win, 'avg_loss': avg_loss, 'turnover': turnover,
         'maxdd': round(float((pd.Series(eq) / peak - 1).min() * 100), 2),
         'ath': round((max(eq) / eq0 - 1) * 100, 2), 'atl': round((min(eq) / eq0 - 1) * 100, 2),
         'trades': len(closed), 'winrate': round(len(wins) / len(closed) * 100) if closed else 0,
