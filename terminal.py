@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v5.0-vertex-deep'      # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v5.1-vertex-fiche'     # marqueur de version (visible dans /healthz)
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -5247,6 +5247,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     <button id="favBtn" onclick="toggleFav()" style="margin-left:14px;background:#0e0e0e;border:1px solid #F5B45B55;color:#F5B45B;border-radius:10px;padding:9px 15px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">☆ Suivre</button>
   </div>
   <div id="ibkr"></div>
+  <div id="vertexcard"></div>
   <div class="card" style="margin-bottom:14px"><div class="ct">📊 GRAPHIQUE TRADINGVIEW · <span id="tvsym"></span></div><div id="tvchart" style="height:430px"></div><div class="muted" style="font-size:10px;margin-top:6px">Graphique fourni par TradingView · analyse éducative.</div></div>
   <div class="grid2">
     <div id="left"></div>
@@ -5272,6 +5273,37 @@ function qc(q){return q>=78?C.g:q>=62?C.gold:q>=50?C.yl:C.r}
 const FIT={leaps:['✅ LEAPS',C.g],swing:['⚡ Swing',C.blue],tact:['⚠️ Tactique',C.yl],avoid:['❌ Éviter',C.r]};
 function fitOf(c){const d=Math.abs(c.delta||0);if((c.quality||0)<50||c.danger==='Extrême'||(c.spread!=null&&c.spread>10))return'avoid';if(c.bucket==='long'&&d>=0.6&&(c.quality||0)>=66)return'leaps';if(c.bucket==='moyen')return'swing';if(c.bucket==='court')return'tact';return'swing';}
 function kpi(l,v){return `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`}
+function _vbar(label,val,col){val=Math.max(0,Math.min(100,val||0));return '<div style="margin:5px 0"><div style="display:flex;justify-content:space-between;font-size:10.5px"><span class="muted">'+label+'</span><b>'+val+'</b></div><div style="height:6px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+val+'%;background:'+(col||'#A78BFA')+'"></div></div></div>';}
+function buildVertexCard(){
+  fetch('/api/vertex/'+encodeURIComponent(SYM)).then(function(r){return r.json()}).then(function(k){
+    var el=document.getElementById('vertexcard'); if(!el)return;
+    if(!k||!k.ok||!k.vertex){el.innerHTML='';return;}
+    var v=k.vertex,ex=k.explain||{},mc=v.mc||{},bs=v.bootstrap||{},ev=v.ev||{};
+    var vd=v.verdict||'';var vc=(vd.indexOf('S+')>=0||vd.indexOf('BUY')>=0)?C.g:vd.indexOf('WATCH')>=0?C.gold:vd.indexOf('WAIT')>=0?C.yl:C.r;
+    var pw=Math.round((v.p_win||0)*100);
+    var h='<div class="card" style="margin-bottom:14px;border:1.5px solid '+vc+'66;background:linear-gradient(135deg,'+vc+'14,#0b0b0b)">'
+      +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px"><span style="font-size:14px;font-weight:900;color:#A78BFA">🔺 VERTEX</span>'
+      +'<span style="font-size:17px;font-weight:900;color:'+vc+';border:1.5px solid '+vc+';border-radius:9px;padding:1px 12px">'+vd+'</span>'
+      +'<span style="font-size:25px;font-weight:900;color:'+vc+'">'+v.edge+'<span style="font-size:12px;color:#888">/100</span></span>'
+      +'<span style="margin-left:auto;text-align:right"><div style="font-size:10px;color:#8794ab">P(GAIN) CALIBRÉE</div><div style="font-size:21px;font-weight:900;color:'+(pw>=60?C.g:pw>=45?C.gold:C.r)+'">'+pw+'%</div></span></div>';
+    if(v.no_trade)h+='<div style="background:rgba(239,68,68,.1);border:1px solid #EF444455;border-radius:8px;padding:8px 11px;font-size:12px;margin-bottom:10px"><b style="color:#F87171">⛔ NO-TRADE</b> — '+(v.risk_flags||[]).join(', ')+'</div>';
+    h+='<div class="grid2"><div><div class="ct">🧠 Décomposition de l\'edge</div>';
+    (ex.components||[]).forEach(function(c){h+=_vbar(c.label+' ('+c.weight+'%)',c.score,(c.contribution>=0?'#A78BFA':'#EF4444'));});
+    h+='</div><div><div class="ct">🎲 Scénarios & chiffres</div><table style="width:100%;font-size:12px">'
+      +'<tr><td class="muted">Monte-Carlo · P(TP1)</td><td style="text-align:right;font-weight:700">'+Math.round((mc.p_hit_tp1||0)*100)+'%</td></tr>'
+      +'<tr><td class="muted">Stop avant cible</td><td style="text-align:right" class="dn">'+Math.round((mc.p_stop_before_tp1||0)*100)+'%</td></tr>'
+      +'<tr><td class="muted">Edge MC moyen</td><td style="text-align:right">'+(mc.edge_mean_bps||0)+' bps</td></tr>'
+      +'<tr><td class="muted">Bootstrap réel P5/P50/P95</td><td style="text-align:right">'+(bs.p05!=null?bs.p05+' / '+bs.p50+' / '+bs.p95+'%':'—')+'</td></tr>'
+      +'<tr><td class="muted">Bootstrap · % positif</td><td style="text-align:right" class="up">'+(bs.p_positive!=null?Math.round(bs.p_positive*100)+'%':'—')+'</td></tr>'
+      +'<tr><td class="muted">Espérance (EV) / trade</td><td style="text-align:right;font-weight:800" class="'+((ev.ev_pct||0)>=0?'up':'dn')+'">'+(ev.ev_pct!=null?(ev.ev_pct>=0?'+':'')+ev.ev_pct+'%':'—')+'</td></tr>'
+      +'<tr><td class="muted">Gain/Perte (RR)</td><td style="text-align:right">+'+(ev.gain_pct||0)+'% / -'+(ev.loss_pct||0)+'% ('+(ev.rr||0)+':1)</td></tr>'
+      +'<tr><td class="muted">Kelly indicatif</td><td style="text-align:right">'+((v.kelly||{}).pct||0)+'%</td></tr>'
+      +'</table></div></div>'
+      +'<div class="muted" style="font-size:11px;margin-top:10px;line-height:1.5">'+(ex.synthesis||'')+'</div>'
+      +'<div style="font-size:10px;color:#5b6678;margin-top:6px">🔬 Monte-Carlo + bootstrap réel + calibration · analyse éducative, jamais un ordre.</div></div>';
+    el.innerHTML=h;
+  }).catch(function(){});
+}
 async function load(){
   let o={},s={},q={};
   try{[o,s,q]=await Promise.all([fetch('/options/'+SYM).then(r=>r.json()),fetch('/scan').then(r=>r.json()),fetch('/quotes').then(r=>r.json()).catch(()=>({}))]);}catch(e){}
@@ -5336,6 +5368,7 @@ function toggleFav(){let a=getFavs();if(a.includes(SYM))a=a.filter(x=>x!==SYM);e
 function updateFavBtn(flash){const b=document.getElementById('favBtn');if(!b)return;const on=getFavs().includes(SYM);b.innerHTML=on?'⭐ Dans Ma Page':'☆ Suivre';b.style.background=on?'rgba(245,180,91,.16)':'#0e0e0e';if(flash&&on){b.innerHTML='⭐ Ajouté à Ma Page ✓';setTimeout(()=>updateFavBtn(false),1400);}}
 updateFavBtn(false);
 load();setInterval(load,15000);
+buildVertexCard();setInterval(buildVertexCard,30000);
 </script></body></html>"""
 
 
