@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.9-ml-calibration'   # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v5.0-vertex-deep'      # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -980,6 +980,20 @@ def api_strategie():
 def api_comite():
     """Comité d'investissement : décisions documentées (4 portes). Analyse only."""
     return jsonify(scan_state.get('committee') or {})
+
+
+@app.route('/api/vertex/<sym>')
+def api_vertex(sym):
+    """Deep-dive VERTEX d'un titre : bloc quant complet + décomposition explicable."""
+    d = (scan_state.get('detail') or {}).get(sym.upper())
+    if not d:
+        return jsonify({'ok': False, 'note': 'titre non scanné'})
+    v = d.get('vertex')
+    if not v:
+        return jsonify({'ok': False, 'note': 'vertex indisponible'})
+    return jsonify({'ok': True, 'symbol': sym.upper(), 'price': d.get('price'),
+                    'grade': d.get('grade'), 'score': d.get('score'),
+                    'vertex': v, 'explain': vertex.explain(v, d)})
 
 
 @app.route('/api/validator')
