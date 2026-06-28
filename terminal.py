@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots, vertex, portfolio_risk
+from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots, vertex, portfolio_risk, validator
 
 DAILY_PREV_PATH = os.path.join(os.path.dirname(__file__), 'daily_prev.json')  # baseline diff jour/jour
 WEEKLY_PATH = os.path.join(os.path.dirname(__file__), 'weekly_snapshot.json')  # sélection hebdo FIGÉE
@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.7-risk-manager'     # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.8-validator'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -982,6 +982,16 @@ def api_comite():
     return jsonify(scan_state.get('committee') or {})
 
 
+@app.route('/api/validator')
+def api_validator():
+    """VERTEX — validateur hors échantillon (walk-forward, DSR, PSR, PBO). Indicatif."""
+    pf = scan_state.get('portfolio') or {}
+    eq = pf.get('equity')
+    if not eq:
+        return jsonify({'ok': False, 'note': 'backtest indisponible (univers/historique insuffisant)'})
+    return jsonify(validator.build(eq))
+
+
 @app.route('/api/risk')
 def api_risk():
     """VERTEX v4 — Risk Manager portefeuille (corrélation, concentration, secteurs).
@@ -1072,9 +1082,13 @@ def api_command():
             alerts.append(['🟠', 'CORRÉLATION', f"Panier trop corrélé ({risk['avg_corr']}) — diversifier avant d'ajouter du risque."])
         if 'concentration_sectorielle' in risk.get('flags', []):
             alerts.append(['🟠', 'CONCENTRATION', f"Secteur {risk.get('max_sector_name')} à {risk.get('max_sector')}% — trop concentré."])
+    try:
+        valid = validator.build((scan_state.get('portfolio') or {}).get('equity') or [])
+    except Exception:
+        valid = None
     return jsonify({'regime': regime, 'portfolio_score': score, 'decision': decision,
                     'top_stocks': top_stocks, 'top_options': top_options, 'alerts': alerts,
-                    'counts': cm.get('counts') or {}, 'risk': risk,
+                    'counts': cm.get('counts') or {}, 'risk': risk, 'validation': valid,
                     'exposure': {'actions': '70-90%', 'options': '10-20%', 'etf': 'tampon / cash'}})
 
 
@@ -2316,6 +2330,16 @@ function buildVertexCmd(){
         +(rk.max_sector_name?'<span class="pill" style="color:#8794ab">'+rk.max_sector_name+' '+rk.max_sector+'%</span>':'')
         +(rk.top_pair?'<span class="pill" style="color:#8794ab">'+rk.top_pair[0]+'↔'+rk.top_pair[1]+' '+rk.top_pair[2]+'</span>':'')
         +'</div></div>';}
+    var vl=k.validation;
+    if(vl&&vl.ok){
+      h+='<div style="padding:2px 16px 12px"><div style="font-size:11px;font-weight:800;color:#38BDF8;margin-bottom:6px">🔬 VALIDATION HORS ÉCHANTILLON</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        +'<span class="pill" style="border-color:'+vl.color+'55;color:'+vl.color+'">'+vl.verdict+'</span>'
+        +'<span class="pill" style="color:#8794ab">Sharpe '+vl.sharpe_ann+'</span>'
+        +'<span class="pill" style="color:#8794ab">DSR '+vl.dsr+'</span>'
+        +'<span class="pill" style="color:#8794ab">walk-fwd +'+vl.folds_positive_pct+'%</span>'
+        +'<span class="pill" style="color:#8794ab">PBO '+vl.pbo_estimate+'</span></div>'
+        +'<div class="src" style="padding:6px 0 0">'+vl.note+'</div></div>';}
     var ex=k.exposure||{};
     h+='<div class="src" style="padding:6px 16px 12px">📌 Cible d\'exposition : Actions '+ex.actions+' · Options '+ex.options+' · ETF '+ex.etf+' · ⛔ aucun ordre — décisions, scores & plans uniquement.</div></div>';
     el.innerHTML=h;

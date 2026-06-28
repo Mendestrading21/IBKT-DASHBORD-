@@ -9,7 +9,36 @@ import os
 
 os.environ.setdefault("NO_IBKR", "1")
 
-from elio import vertex, options  # noqa: E402
+from elio import vertex, options, validator  # noqa: E402
+
+
+def _equity(mu=0.0010, sd=0.011, n=240, seed=3):
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    r = rng.normal(mu, sd, n)
+    eq = [100000.0]
+    for x in r:
+        eq.append(eq[-1] * (1 + x))
+    return eq
+
+
+def test_validator_outputs_in_range():
+    v = validator.build(_equity(), n_trials=10)
+    assert v['ok'] is True
+    for k in ('dsr', 'psr0', 'pbo_estimate'):
+        assert 0.0 <= v[k] <= 1.0, (k, v[k])
+    assert v['verdict'] in ('CRÉDIBLE', 'PROMETTEUR', 'FRAGILE')
+
+
+def test_validator_short_series_handled():
+    assert validator.build([100, 101, 102])['ok'] is False
+    assert validator.build([])['ok'] is False
+
+
+def test_validator_edge_beats_noise():
+    strong = validator.build(_equity(mu=0.0020, sd=0.008, seed=1), n_trials=5)
+    noise = validator.build(_equity(mu=0.0, sd=0.012, seed=1), n_trials=5)
+    assert strong['dsr'] >= noise['dsr']
 
 
 def _fake(**over):
