@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots, vertex
+from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots, vertex, portfolio_risk
 
 DAILY_PREV_PATH = os.path.join(os.path.dirname(__file__), 'daily_prev.json')  # baseline diff jour/jour
 WEEKLY_PATH = os.path.join(os.path.dirname(__file__), 'weekly_snapshot.json')  # sélection hebdo FIGÉE
@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.6-vertex-ui'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.7-risk-manager'     # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -982,6 +982,16 @@ def api_comite():
     return jsonify(scan_state.get('committee') or {})
 
 
+@app.route('/api/risk')
+def api_risk():
+    """VERTEX v4 — Risk Manager portefeuille (corrélation, concentration, secteurs).
+    Panier = top convictions du scan. Lecture seule, indicatif, aucun ordre."""
+    rows = scan_state.get('rows') or []
+    detail = scan_state.get('detail') or {}
+    syms = [r['symbol'] for r in rows[:10]]
+    return jsonify(portfolio_risk.build(syms, detail))
+
+
 @app.route('/api/command')
 def api_command():
     """VERTEX COMMAND CENTER : consolide régime, top actions/options, alertes,
@@ -1049,9 +1059,22 @@ def api_command():
     else:
         decision = {'action': 'ATTENDRE / SÉLECTIF', 'color': '#FFB23F',
                     'msg': 'Peu d\'avantage statistique — n\'acheter que l\'exceptionnel, garder du cash.'}
+    # RISK MANAGER portefeuille (corrélation / concentration / secteurs)
+    try:
+        risk = portfolio_risk.build([r['symbol'] for r in (cm.get('decisions') or [])
+                                     if r['verdict'] in ('ACHETER', 'RENFORCER')][:8] or
+                                    [r['symbol'] for r in (scan_state.get('rows') or [])[:8]],
+                                    detail)
+    except Exception:
+        risk = None
+    if risk and risk.get('no_new_risk'):
+        if 'correlation_panier_elevee' in risk.get('flags', []):
+            alerts.append(['🟠', 'CORRÉLATION', f"Panier trop corrélé ({risk['avg_corr']}) — diversifier avant d'ajouter du risque."])
+        if 'concentration_sectorielle' in risk.get('flags', []):
+            alerts.append(['🟠', 'CONCENTRATION', f"Secteur {risk.get('max_sector_name')} à {risk.get('max_sector')}% — trop concentré."])
     return jsonify({'regime': regime, 'portfolio_score': score, 'decision': decision,
                     'top_stocks': top_stocks, 'top_options': top_options, 'alerts': alerts,
-                    'counts': cm.get('counts') or {},
+                    'counts': cm.get('counts') or {}, 'risk': risk,
                     'exposure': {'actions': '70-90%', 'options': '10-20%', 'etf': 'tampon / cash'}})
 
 
@@ -2283,6 +2306,16 @@ function buildVertexCmd(){
     h+='<div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 16px 14px">'
       +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#FF8C32;margin-bottom:6px">📈 TOP ACTIONS <span class="muted" style="font-weight:400">· 🔺 edge Vertex</span></div>'+(ts.length?ts.map(function(x){var vt=x.vertex||{};var vb=vt.edge!=null?' <span style="color:#A78BFA;font-size:9px;font-weight:700">🔺'+vt.edge+(vt.p_tp1!=null?' · TP1 '+Math.round(vt.p_tp1*100)+'%':'')+'</span>':'';return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px;flex-wrap:wrap"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="color:'+x.color+';font-weight:800;font-size:11px">'+x.verdict+'</span><span class="muted" style="font-size:10px">R:R '+(x.rr||0)+':1</span>'+vb+'<span style="margin-left:auto;font-size:10px;color:#8794ab">conv '+x.conviction+'</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">Aucun achat validé — patience.</div>')+'</div>'
       +'<div style="flex:1;min-width:240px"><div style="font-size:11px;font-weight:800;color:#A78BFA;margin-bottom:6px">💎 TOP OPTIONS CALL</div>'+(to.length?to.map(function(x){return '<div onclick="location.href=\'/titre/'+x.symbol+'\'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid #ffffff10;border-radius:9px;margin-bottom:5px"><span class="sym" style="min-width:52px">'+x.symbol+'</span><span style="font-size:10px;color:#8794ab">'+x.label+' $'+x.strike+'</span><span style="margin-left:auto;font-size:11px" class="up">+'+x.prob+'%</span></div>';}).join(''):'<div class="muted" style="font-size:11px;padding:4px">—</div>')+'</div></div>';
+    var rk=k.risk;
+    if(rk&&rk.n>=2){var rc=rk.no_new_risk?'#EF4444':'#22C55E';
+      h+='<div style="padding:2px 16px 12px"><div style="font-size:11px;font-weight:800;color:#34D399;margin-bottom:6px">🛡️ RISK MANAGER · panier</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        +'<span class="pill" style="border-color:'+rc+'55;color:'+rc+'">'+(rk.no_new_risk?'⚠️ RISQUE CONCENTRÉ':'✅ DIVERSIFIÉ '+rk.diversification+'%')+'</span>'
+        +'<span class="pill" style="color:#8794ab">corr. moy. '+rk.avg_corr+'</span>'
+        +'<span class="pill" style="color:#8794ab">ligne max '+rk.max_weight+'%</span>'
+        +(rk.max_sector_name?'<span class="pill" style="color:#8794ab">'+rk.max_sector_name+' '+rk.max_sector+'%</span>':'')
+        +(rk.top_pair?'<span class="pill" style="color:#8794ab">'+rk.top_pair[0]+'↔'+rk.top_pair[1]+' '+rk.top_pair[2]+'</span>':'')
+        +'</div></div>';}
     var ex=k.exposure||{};
     h+='<div class="src" style="padding:6px 16px 12px">📌 Cible d\'exposition : Actions '+ex.actions+' · Options '+ex.options+' · ETF '+ex.etf+' · ⛔ aucun ordre — décisions, scores & plans uniquement.</div></div>';
     el.innerHTML=h;
