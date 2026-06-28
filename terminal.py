@@ -28,7 +28,7 @@ try:
 except Exception:
     pass
 
-from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots
+from elio import scoring, config, options, ai, daily, anomalies, sectors, research, market, weekly, fundamentals, engine, ibkr, strategy, committee, pivots, vertex
 
 DAILY_PREV_PATH = os.path.join(os.path.dirname(__file__), 'daily_prev.json')  # baseline diff jour/jour
 WEEKLY_PATH = os.path.join(os.path.dirname(__file__), 'weekly_snapshot.json')  # sélection hebdo FIGÉE
@@ -76,7 +76,7 @@ LIVE_SYMBOLS = list(dict.fromkeys(WATCHLIST + _TREND_EXTRA + _BIG_EXTRA))[:95]
 TREND_SET = set(_TREND_EXTRA)   # valeurs « buzz / fast movers » → badge 🔥 dans l'UI
 BENCH = 'SPY'
 R = 0.045
-BUILD = 'v4.3-structure'        # marqueur de version (visible dans /healthz) — change à chaque déploiement
+BUILD = 'v4.4-vertex-core'      # marqueur de version (visible dans /healthz) — change à chaque déploiement
 # IBKR désactivé sur le cloud (pas de TWS) → met NO_IBKR=1 en variable d'env
 IBKR_ENABLED = os.environ.get('NO_IBKR') != '1'
 # MODE DÉMO (cloud/vitrine) : remplit le dashboard avec des chiffres synthétiques
@@ -272,7 +272,7 @@ def analyse(df, bench_ret):
         struct = pivots.structure(df, atr)
     except Exception:
         struct = None
-    return {
+    result = {
         'structure': struct,
         'price': round(last, 2), 'change': round(chg, 2), 'score': score, 'grade': grade, 'verdict': verdict,
         'trend': round(trend), 'mom': round(mom), 'rs': round(rs), 'rsi': round(r),
@@ -284,6 +284,11 @@ def analyse(df, bench_ret):
         'signals': sig, 'sub': sc,
         'plan': plan, 'series': series,
     }
+    try:
+        result['vertex'] = vertex.evaluate(result)
+    except Exception:
+        result['vertex'] = None
+    return result
 
 
 def backtest(data, lb=126, top_n=5, smin=58, eq0=100000.0):
