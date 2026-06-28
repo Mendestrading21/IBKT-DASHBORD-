@@ -118,3 +118,38 @@ def test_robust_on_missing_data():
 def test_verdict_is_valid():
     v = vertex.evaluate(_fake())
     assert v['verdict'] in ('VERTEX S+', 'VERTEX BUY', 'VERTEX WATCH', 'VERTEX WAIT', 'VERTEX AVOID')
+
+
+def _fake_series(n=130, start=100.0, drift=0.001, seed=2):
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    r = rng.normal(drift, 0.012, n)
+    c = start * np.exp(np.cumsum(r))
+    return [round(float(x), 2) for x in c]
+
+
+def test_bootstrap_edge_invariants():
+    d = _fake(series={'close': _fake_series()})
+    bs = vertex.bootstrap_edge(d)
+    assert bs is not None
+    assert 0.0 <= bs['p_positive'] <= 1.0
+    assert bs['p05'] <= bs['p50'] <= bs['p95']
+    assert 0.0 <= bs['stability'] <= 1.0
+
+
+def test_expected_value_signs():
+    ev = vertex.expected_value(_fake(), 0.6)
+    assert ev['gain_pct'] > 0 and ev['loss_pct'] > 0
+    assert isinstance(ev['positive'], bool)
+
+
+def test_explain_structure():
+    v = vertex.evaluate(_fake(series={'close': _fake_series()}))
+    ex = vertex.explain(v, _fake())
+    assert ex and len(ex['components']) >= 5
+    assert isinstance(ex['synthesis'], str) and len(ex['synthesis']) > 20
+
+
+def test_bootstrap_deterministic():
+    d = _fake(series={'close': _fake_series()})
+    assert vertex.bootstrap_edge(d) == vertex.bootstrap_edge(d)

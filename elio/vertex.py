@@ -237,6 +237,96 @@ def monte_carlo_edge(d, n_paths=1200, days=45):
         return None
 
 
+# ── BOOTSTRAP EDGE (non-paramétrique, sur l'historique RÉEL) ──────────────────
+def bootstrap_edge(d, horizon=45, n_boot=1500, block=5):
+    """Rééchantillonne par BLOCS l'historique réel des rendements (préserve
+    l'autocorrélation) → distribution des rendements futurs sur `horizon` jours.
+    Complète le Monte-Carlo paramétrique par une vue tirée des vraies données.
+    Déterministe (graine = dernier cours)."""
+    try:
+        c = ((d.get('series') or {}).get('close'))
+        if not c or len(c) < 60:
+            return None
+        c = np.asarray(c, dtype=float)
+        lr = np.diff(np.log(np.clip(c, 1e-9, None)))
+        n = len(lr)
+        if n < max(horizon, block + 2):
+            return None
+        seed = int(abs(float(c[-1]) * 1000)) % (2 ** 32)
+        rng = np.random.default_rng(seed)
+        nblocks = int(np.ceil(horizon / block))
+        starts = rng.integers(0, n - block, size=(n_boot, nblocks))
+        idx = (starts[..., None] + np.arange(block)).reshape(n_boot, -1)[:, :horizon]
+        cum = lr[idx].sum(axis=1)
+        ret = np.exp(cum) - 1.0
+        p_pos = float((ret > 0).mean())
+        return {
+            'mean_pct': round(float(ret.mean()) * 100, 2),
+            'p_positive': round(p_pos, 3),
+            'p05': round(float(np.percentile(ret, 5)) * 100, 2),
+            'p50': round(float(np.percentile(ret, 50)) * 100, 2),
+            'p95': round(float(np.percentile(ret, 95)) * 100, 2),
+            'stability': round(abs(p_pos - 0.5) * 2, 2),       # 0 = pile/face, 1 = directionnel
+            'horizon': horizon, 'n_boot': n_boot,
+        }
+    except Exception:
+        return None
+
+
+# ── ESPÉRANCE MATHÉMATIQUE DU TRADE ───────────────────────────────────────────
+def expected_value(d, p_win):
+    """EV (%) = p_win·gain − (1−p_win)·perte, depuis le plan (entrée/stop/TP2)."""
+    try:
+        plan = d.get('plan') or {}
+        entry = _f(plan.get('entry') or d.get('price'))
+        stop = _f(plan.get('stop'))
+        tp2 = _f(plan.get('tp2'))
+        if entry <= 0 or stop <= 0 or entry <= stop:
+            return None
+        gain = (tp2 - entry) / entry * 100 if tp2 > entry else 0.0
+        loss = (entry - stop) / entry * 100
+        p = max(0.0, min(1.0, _f(p_win, 0.5)))
+        ev = p * gain - (1 - p) * loss
+        return {'gain_pct': round(gain, 1), 'loss_pct': round(loss, 1),
+                'ev_pct': round(ev, 2), 'rr': round(gain / loss, 1) if loss > 0 else None,
+                'positive': ev > 0}
+    except Exception:
+        return None
+
+
+# ── EXPLICABILITÉ : décomposition transparente du verdict ─────────────────────
+def explain(out, d=None):
+    """Décompose le score Vertex en contributions lisibles + synthèse texte."""
+    try:
+        if not out:
+            return None
+        comp = [
+            ('Qualité de tendance', out.get('trend_quality'), 0.30, 'structure MM, ADX, force relative'),
+            ('Qualité d\'entrée', out.get('entry_quality'), 0.24, 'RSI, extension, régime'),
+            ('Reward/Risk', out.get('rr'), 0.18, 'cible vs stop (plafonné résistance)'),
+            ('Atteignabilité', out.get('expected_move'), 0.16, 'distance objectif en ATR'),
+            ('Institutionnalité', out.get('institutionality'), 0.12, 'persistance, liquidité'),
+        ]
+        rows = [{'label': l, 'score': v, 'weight': round(w * 100),
+                 'contribution': round((v or 0) * w, 1), 'comment': cm} for l, v, w, cm in comp]
+        rows.append({'label': 'Pénalité extension', 'score': out.get('extension_penalty'),
+                     'weight': -25, 'contribution': -round((out.get('extension_penalty') or 0) * 0.25, 1),
+                     'comment': 'éviter d\'acheter trop haut (non linéaire)'})
+        mc = out.get('mc') or {}
+        bs = out.get('bootstrap') or {}
+        ev = out.get('ev') or {}
+        synth = (f"Verdict {out.get('verdict')} (edge {out.get('edge')}/100, "
+                 f"P(gain) {round((out.get('p_win') or 0) * 100)}%). "
+                 f"Monte-Carlo : {round((mc.get('p_hit_tp1') or 0) * 100)}% de toucher TP1, "
+                 f"stop avant cible {round((mc.get('p_stop_before_tp1') or 0) * 100)}%. "
+                 f"Bootstrap réel : {bs.get('p_positive') and round(bs['p_positive'] * 100)}% positif sur {bs.get('horizon')}j. "
+                 f"EV {ev.get('ev_pct')}% / trade (gain {ev.get('gain_pct')}% vs perte {ev.get('loss_pct')}%).")
+        return {'components': rows, 'synthesis': synth,
+                'risk_flags': out.get('risk_flags', []), 'no_trade': out.get('no_trade')}
+    except Exception:
+        return None
+
+
 # ── FONCTION CENTRALE ─────────────────────────────────────────────────────────
 _ACTION = {
     'VERTEX S+': 'Setup d\'élite — conviction maximale, déployer (cœur + option CALL).',
@@ -313,6 +403,11 @@ def evaluate(detail):
                 out['p_win'] = out['ml']['p_win']
         except Exception:
             out['ml'] = None
+        try:                                  # chiffres & données : bootstrap réel + EV
+            out['bootstrap'] = bootstrap_edge(d)
+            out['ev'] = expected_value(d, out.get('p_win', 0.5))
+        except Exception:
+            out['bootstrap'] = out.get('bootstrap')
         return out
     except Exception:
         return None
